@@ -33,7 +33,7 @@ const OEFENINGEN = [
     type: 2,
     naam: "Breuken gelijknamig maken",
     beschrijving: "Bereken som, verschil, product en quotiënt van gehele getallen",
-    url: "hoofdbewerkingen_gehele_getallen.html",
+    url: "breuken_gelijknamig_maken.html",
     kleur: "#4A90D9",
     icon: "🔢"
   },
