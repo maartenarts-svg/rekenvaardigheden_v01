@@ -23,6 +23,14 @@ const ADMIN_CODE = "852874179639";
 const OEFENINGEN = [
   {
     type: 1,
+    naam: "Hoofdbewerkingen met gehele getallen",
+    beschrijving: "Bereken som, verschil, product en quotiënt van gehele getallen",
+    url: "oefening_gehele_getallen.html",
+    kleur: "#4A90D9",
+    icon: "🔢"
+  },
+  {
+    type: 2,
     naam: "Breuken optellen & aftrekken",
     beschrijving: "Tel en trek breuken op met gelijke en ongelijke noemers",
     url: "oefening_breuken_optellen.html",
@@ -30,7 +38,7 @@ const OEFENINGEN = [
     icon: "➕"
   },
   {
-    type: 2,
+    type: 3,
     naam: "Breuken vermenigvuldigen",
     beschrijving: "Vermenigvuldig twee of meer breuken",
     url: "oefening_breuken_vermenigvuldigen.html",
@@ -38,7 +46,7 @@ const OEFENINGEN = [
     icon: "✖️"
   },
   {
-    type: 3,
+    type: 4,
     naam: "Breuken delen",
     beschrijving: "Deel breuken door elkaar",
     url: "oefening_breuken_delen.html",
@@ -46,7 +54,7 @@ const OEFENINGEN = [
     icon: "➗"
   },
   {
-    type: 4,
+    type: 5,
     naam: "Macht van een breuk",
     beschrijving: "Bereken machten van breuken",
     url: "oefening_macht_breuk.html",
@@ -54,7 +62,7 @@ const OEFENINGEN = [
     icon: "⬆️"
   },
   {
-    type: 5,
+    type: 6,
     naam: "Volgorde van bewerkingen",
     beschrijving: "Pas de juiste volgorde van bewerkingen toe",
     url: "oefening_volgorde.html",
@@ -62,7 +70,7 @@ const OEFENINGEN = [
     icon: "🔢"
   },
   {
-    type: 6,
+    type: 7,
     naam: "Rekenen met letters",
     beschrijving: "Vereenvoudig uitdrukkingen met variabelen",
     url: "oefening_letters.html",
@@ -70,7 +78,7 @@ const OEFENINGEN = [
     icon: "🔡"
   },
   {
-    type: 7,
+    type: 8,
     naam: "Vergelijkingen oplossen",
     beschrijving: "Los eerstegraadsvergelijkingen op",
     url: "oefening_vergelijkingen.html",
