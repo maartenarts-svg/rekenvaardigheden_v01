@@ -91,7 +91,6 @@
 
     /* Breuk-invoer (na /) */
     .iv-frac { display: inline-flex; flex-direction: column; align-items: center; }
-    .iv-frac .iv-teller { font-size: 1.25rem; font-weight: 800; color: var(--text); text-align: center; padding: 2px 4px; }
     .iv-frac .iv-streep { width: 80%; min-width: 44px; height: 2px; background: var(--muted); border-radius: 2px; margin: 3px 0; }
     .iv-frac input {
       background: transparent; border: none; outline: none;
@@ -307,10 +306,14 @@ function maakStapObj(kolomId, stapIdx) {
 
   // Klik op wrap → activeer
   wrap.addEventListener('mousedown', e => {
-    e.preventDefault();
     if(wrap.classList.contains('disabled')) return;
+    // Niet preventDefault als op een echte input geklikt wordt — laat browser focus werken
+    const opInput = e.target.tagName === 'INPUT';
+    if(!opInput) e.preventDefault();
     activeer(kolomId, stapIdx, obj);
-    if(obj.fase==='frac' && obj.nInput) obj.nInput.focus();
+    // In buffer-fase: geen native focusable element, keydown handler pakt het op
+    // In frac-fase: als niet op een input geklikt, focus naar noemer
+    if(!opInput && obj.fase==='frac' && obj.nInput) obj.nInput.focus();
   });
 
   return obj;
@@ -333,13 +336,10 @@ document.addEventListener('keydown', e => {
   const { kolomId, stapIdx, obj } = actief;
   if(obj.wrap.classList.contains('disabled')) return;
 
-  // Als noemer-input gefocust is
-  if(obj.fase==='frac' && obj.nInput && document.activeElement===obj.nInput) {
-    if(e.key==='Backspace' && obj.nInput.value==='') {
-      e.preventDefault();
-      breuknaarBuf(kolomId, stapIdx, obj);
-    }
-    return; // rest laat native input afhandelen
+  // Als we in frac-fase zijn: teller en noemer hebben eigen keydown handlers.
+  // De globale keydown hoeft hier niets te doen — laat native input werken.
+  if(obj.fase==='frac') {
+    return;
   }
 
   // Buffer-fase
@@ -365,43 +365,87 @@ document.addEventListener('keydown', e => {
 
 function renderBuf(obj) { obj.bufSpan.textContent = obj.bufTekst; }
 
+// Globale mousedown: deactiveer als men buiten een iv-wrap klikt
+document.addEventListener('mousedown', e => {
+  if(!actief) return;
+  const klikOpWrap = e.target.closest('.iv-wrap');
+  if(!klikOpWrap) {
+    // Buiten een wrap geklikt → deactiveer
+    document.querySelectorAll('.iv-wrap').forEach(w=>w.classList.remove('actief'));
+    actief = null;
+  }
+  // Als op een andere wrap geklikt: die wrap's mousedown-handler regelt activatie
+});
+
 function bufNaarBreuk(kolomId, stapIdx, obj) {
   obj.bufSpan.style.display='none';
   const fd = document.createElement('div');
   fd.className='iv-frac';
-  const td=document.createElement('div'); td.className='iv-teller'; td.textContent=obj.teller;
+
+  // Teller: echte input zodat leerling erin kan klikken en aanpassen
+  const ti=document.createElement('input');
+  ti.type='text'; ti.inputMode='numeric'; ti.autocomplete='off'; ti.spellcheck=false;
+  ti.value=obj.teller; ti.dataset.deel='teller';
+  // Breedte aanpassen aan inhoud
+  ti.style.width='60px';
+
   const sd=document.createElement('div'); sd.className='iv-streep';
+
   const ni=document.createElement('input');
   ni.type='text'; ni.inputMode='numeric'; ni.autocomplete='off'; ni.spellcheck=false;
-  fd.appendChild(td); fd.appendChild(sd); fd.appendChild(ni);
-  obj.wrap.appendChild(fd);
-  obj.fracDiv=fd; obj.nInput=ni; obj.fase='frac';
+  ni.dataset.deel='noemer';
 
+  fd.appendChild(ti); fd.appendChild(sd); fd.appendChild(ni);
+  obj.wrap.appendChild(fd);
+  obj.fracDiv=fd; obj.tInput=ti; obj.nInput=ni; obj.fase='frac';
+
+  // Teller-input events
+  ti.addEventListener('input', ()=>{
+    const t=parseInt(ti.value);
+    obj.teller=isNaN(t)?null:t;
+    syncData(kolomId,stapIdx,obj); updateCtrlKnop();
+  });
+  ti.addEventListener('focus', ()=> activeer(kolomId,stapIdx,obj));
+  // Backspace op lege teller-input → terug naar buffer
+  ti.addEventListener('keydown', e=>{
+    if(e.key==='Backspace' && ti.value===''){
+      e.preventDefault();
+      breuknaarBuf(kolomId, stapIdx, obj);
+    }
+  });
+
+  // Noemer-input events
   ni.addEventListener('input', ()=>{
     const n=parseInt(ni.value);
     obj.noemer=isNaN(n)?null:n;
     syncData(kolomId,stapIdx,obj); updateCtrlKnop();
   });
   ni.addEventListener('focus', ()=> activeer(kolomId,stapIdx,obj));
-  ni.addEventListener('blur', ()=>{
-    setTimeout(()=>{
-      if(!obj.wrap.contains(document.activeElement)){
-        obj.wrap.classList.remove('actief');
-        if(actief&&actief.obj===obj) actief=null;
-      }
-    },100);
+  // Backspace op lege noemer-input → focus naar teller
+  ni.addEventListener('keydown', e=>{
+    if(e.key==='Backspace' && ni.value===''){
+      e.preventDefault();
+      ti.focus(); ti.setSelectionRange(ti.value.length, ti.value.length);
+    }
   });
+  // Geen blur-handlers: deactivering globaal via mousedown
   ni.focus();
 }
 
 function breuknaarBuf(kolomId, stapIdx, obj) {
-  if(obj.fracDiv){ obj.fracDiv.remove(); obj.fracDiv=null; obj.nInput=null; }
+  if(obj.fracDiv){ obj.fracDiv.remove(); obj.fracDiv=null; }
+  // nInput is nu een echte input — verwijder ook tInput als die bestaat
+  if(obj.tInput){ obj.tInput=null; } // referentie loskoppelen
+  obj.nInput=null;
   obj.bufSpan.style.display='';
   obj.bufTekst = obj.teller!==null ? obj.teller.toString() : '';
   obj.teller=null; obj.noemer=null; obj.fase='buf';
   renderBuf(obj); syncData(kolomId,stapIdx,obj); updateCtrlKnop();
-  // Veld blijft actief na terugkeer naar buffer-fase
-  activeer(kolomId, stapIdx, obj);
+  // actief blijft hetzelfde object — geen nieuwe activeer() nodig
+  // zorg wel dat de klasse aanwezig is (kan verdwenen zijn door focus-shift)
+  document.querySelectorAll('.iv-wrap').forEach(w=>w.classList.remove('actief'));
+  obj.wrap.classList.add('actief');
+  actief = { kolomId, stapIdx, obj };
 }
 
 function syncData(kolomId, stapIdx, obj) {
