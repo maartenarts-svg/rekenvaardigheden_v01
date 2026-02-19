@@ -90,7 +90,8 @@
       display:inline-flex;align-items:center;min-width:4px;
     }
     .iv-cursor::after{content:'';}
-    .iv-wrap.actief .iv-cursor::after{content:'|';color:var(--accent);animation:blink 1s step-end infinite;font-weight:300;}
+    /* Cursor knippert enkel als actief EN niet in een frac-invoerveld */
+    .iv-wrap.actief:not(.in-frac) .iv-cursor::after{content:'|';color:var(--accent);animation:blink 1s step-end infinite;font-weight:300;}
     @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
     /* Geheel getal invoer */
@@ -134,7 +135,7 @@
     .rr-blok ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
     .rr-blok ul li{display:flex;gap:10px;font-size:.88rem;color:var(--text);line-height:1.55;}
     .rr-blok ul li::before{content:'•';color:var(--accent);font-size:1.1rem;flex-shrink:0;}
-    .rr-blok .rr-sub{font-size:.88rem;color:var(--text);line-height:1.55;padding-left:20px;margin-top:2px;}
+
 
     /* UITWERKING in definitieve feedback */
     .uitwerking{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
@@ -375,11 +376,12 @@ function maakStapObj(stapIdx){
   const obj={
     tokens:[],   // wat al ingevoerd is
     bufTekst:'', // getal dat getypt wordt (nog geen /)
-    fase:'buf',  // 'buf' = bezig met typen getal, 'idle' = klaar voor nieuwe token
+    fase:'buf',
     wrap, cursEl,
-    actieveFracEl:null,  // fracDiv als cursor in noemer zit
+    actieveFracEl:null,
+    wachtOpTeken:false, // true net na verlaten van een breuk: eerste '-' = operator
     rij:null, plusBtn:null,
-    teller:null,noemer:null // voor enkelvoudige breuk (eindantwoord)
+    teller:null,noemer:null
   };
 
   // Klik op wrap
@@ -389,7 +391,6 @@ function maakStapObj(stapIdx){
     if(!opInput) e.preventDefault();
     activeer(stapIdx,obj);
     if(!opInput&&obj.actieveFracEl){
-      // klik op wrap maar niet op input: focus naar noemer van actieve frac
       const ni=obj.actieveFracEl.querySelector('input[data-deel="noemer"]');
       if(ni) ni.focus();
     }
@@ -399,9 +400,16 @@ function maakStapObj(stapIdx){
 }
 
 function activeer(stapIdx,obj){
-  document.querySelectorAll('.iv-wrap').forEach(w=>w.classList.remove('actief'));
+  document.querySelectorAll('.iv-wrap').forEach(w=>w.classList.remove('actief','in-frac'));
   obj.wrap.classList.add('actief');
   actief={stapIdx,obj};
+}
+
+function setActieveFrac(obj, fracEl){
+  // fracEl = de fracDiv die actief is, of null als buiten frac
+  obj.actieveFracEl = fracEl;
+  if(fracEl) obj.wrap.classList.add('in-frac');
+  else obj.wrap.classList.remove('in-frac');
 }
 
 // Globale mousedown: deactiveer als buiten wrap geklikt
@@ -456,26 +464,33 @@ document.addEventListener('keydown',e=>{
   // Buffer fase
   if(e.key.match(/^[0-9]$/)){
     e.preventDefault();
+    obj.wachtOpTeken=false;
     obj.bufTekst+=e.key;
     renderCursor(obj);
     syncStapData(stapIdx,obj);
     updateCtrlKnop();
   } else if(e.key==='-'&&obj.bufTekst===''){
     e.preventDefault();
-    obj.bufTekst='-';
-    renderCursor(obj);
-    syncStapData(stapIdx,obj);
+    if(obj.wachtOpTeken){
+      // Eerste '-' na een breuk = bewerkingsteken
+      voegOperatorToe(stapIdx,obj,'-');
+    } else {
+      // Toestandsteken in teller
+      obj.bufTekst='-';
+      renderCursor(obj);
+      syncStapData(stapIdx,obj);
+    }
   } else if(e.key==='/'&&obj.bufTekst!==''&&obj.bufTekst!=='-'){
     e.preventDefault();
     const t=parseInt(obj.bufTekst);
     obj.bufTekst='';
     renderCursor(obj);
     voegBreukToe(stapIdx,obj,t);
-  } else if((e.key==='+'||e.key==='-')&&obj.bufTekst===''){
-    // Operator invoegen (alleen als er al iets staat)
+  } else if(e.key==='+'&&obj.bufTekst===''){
+    // '+' operator (alleen als er al iets staat)
     if(obj.tokens.length>0){
       e.preventDefault();
-      voegOperatorToe(stapIdx,obj,e.key);
+      voegOperatorToe(stapIdx,obj,'+');
     }
   } else if(e.key==='Backspace'){
     e.preventDefault();
@@ -495,12 +510,9 @@ function renderCursor(obj){
 }
 
 function verlaatveld(obj){
-  // Verlaat de actieve fracDiv, cursor staat rechts naast breuk
-  obj.actieveFracEl=null;
-  obj.wrap.focus&&obj.wrap.focus();
-  // Zorg dat cursEl zichtbaar is
+  setActieveFrac(obj, null);
   obj.wrap.appendChild(obj.cursEl);
-  // Nu kunnen + of - of nieuwe cijfers getypt worden
+  obj.wachtOpTeken=true; // eerste '-' hierna = operator
 }
 
 function voegBreukToe(stapIdx,obj,teller){
@@ -524,13 +536,13 @@ function voegBreukToe(stapIdx,obj,teller){
 
   const token={type:'frac',teller:parseInt(ti.value)||null,noemer:null,el:fracDiv,ti,ni};
   obj.tokens.push(token);
-  obj.actieveFracEl=fracDiv;
+  setActieveFrac(obj, fracDiv);
 
   ti.addEventListener('input',()=>{
     token.teller=parseInt(ti.value)||null;
     syncStapData(stapIdx,obj);updateCtrlKnop();
   });
-  ti.addEventListener('focus',()=>{activeer(stapIdx,obj);obj.actieveFracEl=fracDiv;});
+  ti.addEventListener('focus',()=>{activeer(stapIdx,obj);setActieveFrac(obj,fracDiv);});
   ti.addEventListener('keydown',e=>{
     if(e.key==='Backspace'&&ti.value===''){
       e.preventDefault();
@@ -542,7 +554,7 @@ function voegBreukToe(stapIdx,obj,teller){
     token.noemer=parseInt(ni.value)||null;
     syncStapData(stapIdx,obj);updateCtrlKnop();
   });
-  ni.addEventListener('focus',()=>{activeer(stapIdx,obj);obj.actieveFracEl=fracDiv;});
+  ni.addEventListener('focus',()=>{activeer(stapIdx,obj);setActieveFrac(obj,fracDiv);});
   ni.addEventListener('keydown',e=>{
     if(e.key==='Backspace'&&ni.value===''){
       e.preventDefault();
@@ -565,7 +577,8 @@ function voegOperatorToe(stapIdx,obj,opStr){
   span.textContent=' '+opStr+' ';
   obj.wrap.insertBefore(span,obj.cursEl);
   obj.tokens.push({type:'op',waarde:opStr,el:span});
-  obj.actieveFracEl=null;
+  setActieveFrac(obj, null);
+  obj.wachtOpTeken=false;
   syncStapData(stapIdx,obj);updateCtrlKnop();
 }
 
@@ -575,7 +588,8 @@ function verwijderLaatsteToken(stapIdx,obj){
   last.el.remove();
   obj.tokens.pop();
   // Als het een frac was, actieveFracEl resetten
-  if(last.type==='frac') obj.actieveFracEl=null;
+  if(last.type==='frac'){ setActieveFrac(obj, null); obj.wachtOpTeken=true; }
+  if(last.type==='op'){ obj.wachtOpTeken=true; } // terug na een breuk
   syncStapData(stapIdx,obj);updateCtrlKnop();
   renderCursor(obj);
 }
@@ -778,12 +792,14 @@ function controleer(){
   // Valideer het antwoord
   const {ok:antOk,reden}=valideerAntwoord(antParsed,corrRes,corrIsGeheel);
 
-  // Markeer stappen
+  // Markeer stappen & verberg + knoppen op niet-laatste stappen
   for(let i=0;i<antIdx;i++){
-    const p=parseTokens(stappen[i].tokens);
+    const p=parseTokens(stappen[i].tokens, stappen[i].bufTekst||'');
     if(!p) continue;
     stappen[i].obj.wrap.classList.toggle('fout',tussenFout.includes(i));
     stappen[i].obj.wrap.classList.toggle('correct',!tussenFout.includes(i));
+    // Verberg + knop op alle tussenstappen (enkel zichtbaar na laatste stap)
+    if(stappen[i].plusBtn) stappen[i].plusBtn.style.display='none';
   }
   stappen[antIdx].obj.wrap.classList.toggle('correct',antOk);
   stappen[antIdx].obj.wrap.classList.toggle('fout',!antOk);
@@ -912,7 +928,7 @@ function maakRekenregel(oef){
   return `<div class="rr-titel">REKENREGEL</div><ul>
     <li>Schrijf, enkel als de tweede breuk negatief is, eenvoudiger.</li>
     <li>Maak de breuken gelijknamig.</li>
-    <li>Behoud de noemer.<div class="rr-sub">Voer de bewerking uit met de tellers.</div></li>
+    <li>Behoud de noemer. Voer de bewerking uit met de tellers.</li>
     <li>Schrijf het resultaat als een onvereenvoudigbare breuk.</li>
   </ul>`;
 }
@@ -921,6 +937,22 @@ function maakRekenregel(oef){
    DEFINITIEVE FEEDBACK + UITWERKING
 ═══════════════════════════════════════════════════════ */
 function maakDefinitieveFeedback(antParsed,corrRes,corrIsGeheel,oef){
+  // Speciale feedback: wiskundig gelijk maar niet gereduceerd
+  if(antParsed&&antParsed.soort==='breuk'){
+    const wiskundigGelijk=breukGelijk(antParsed.t,antParsed.n,corrRes.t,corrRes.n);
+    const g=gcd(Math.abs(antParsed.t),Math.abs(antParsed.n));
+    if(wiskundigGelijk&&g>1){
+      // Correct antwoord tonen
+      const corrTekst=corrIsGeheel
+        ? `<strong>${corrRes.t}</strong>`
+        : `<strong>${corrRes.t}/${corrRes.n}</strong>`;
+      return `Je antwoord is niet juist: de breuk kan nog vereenvoudigd worden. Het juiste antwoord is ${corrTekst}.`;
+    }
+    if(wiskundigGelijk&&corrIsGeheel){
+      return `Je antwoord is niet juist: de breuk kan nog vereenvoudigd worden. Het juiste antwoord is <strong>${corrRes.t}</strong>.`;
+    }
+  }
+  // Algemene feedback + uitwerking
   let html='Je antwoord is niet juist.<br>';
   html+='<div class="uitwerking">'+maakUitwerking(oef,corrRes)+'</div>';
   return html;
