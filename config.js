@@ -25,7 +25,7 @@ const OEFENINGEN = [
     type: 1,
     naam: "Hoofdbewerkingen met gehele getallen",
     beschrijving: "Bereken som, verschil, product en quotiënt van gehele getallen",
-    url: "oefening_gehele_getallen.html",
+    url: "hoofdbewerkingen_gehele_getallen.html",
     kleur: "#4A90D9",
     icon: "🔢"
   },
