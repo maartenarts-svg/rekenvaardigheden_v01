@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Breuken optellen en aftrekken – Wiskunde Oefenplatform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0f1117; --surface:#1a1d27; --surface2:#20243a;
+      --border:rgba(255,255,255,0.08); --text:#e8eaf0; --muted:#8891aa;
+      --accent:#5b8dee; --success:#4cbb8a; --danger:#e05757; --warning:#f5c542;
+      --radius:14px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    body::before{content:'';position:fixed;inset:0;
+      background:radial-gradient(ellipse 60% 40% at 20% 10%,rgba(91,141,238,.10) 0%,transparent 70%),
+                 radial-gradient(ellipse 50% 50% at 80% 80%,rgba(76,187,138,.07) 0%,transparent 70%);
+      pointer-events:none;z-index:0;}
+    .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:32px 20px 60px;}
+
+    /* HEADER */
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;gap:12px;flex-wrap:wrap;}
+    .back-btn{display:inline-flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:600;padding:8px 14px;border:1px solid var(--border);border-radius:8px;transition:all .2s;}
+    .back-btn:hover{color:var(--text);border-color:rgba(255,255,255,.2);}
+    .page-title h1{font-size:1.3rem;font-weight:800;}
+    .page-title span{font-size:.78rem;color:var(--muted);}
+
+    /* VOORTGANG */
+    .progress-wrap{margin-bottom:28px;}
+    .progress-meta{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-bottom:8px;font-weight:600;}
+    .progress-track{height:8px;background:var(--surface);border-radius:99px;overflow:hidden;border:1px solid var(--border);}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#a0c4ff);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%;}
+
+    /* KAART */
+    .oefening-kaart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;animation:fadeIn .3s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    .vraag-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:20px;display:block;}
+
+    /* OPGAVE */
+    .opgave-box{
+      display:flex;align-items:center;justify-content:center;gap:16px;
+      background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+      padding:20px 32px;margin-bottom:28px;min-height:90px;flex-wrap:wrap;
+    }
+    .opgave-term{display:inline-flex;flex-direction:column;align-items:center;font-size:1.9rem;font-weight:800;line-height:1;}
+    .opgave-term .bt{padding:4px 10px;}
+    .opgave-term .bs{width:100%;min-width:36px;height:3px;background:var(--text);border-radius:2px;margin:5px 0;}
+    .opgave-term .bn{padding:4px 10px;}
+    .opgave-op{font-size:1.9rem;font-weight:800;color:var(--muted);padding:0 4px;}
+
+    /* INVOER */
+    .invoer-kolom{display:flex;flex-direction:column;gap:0;}
+
+    /* Stap-rij */
+    .stap-rij{display:flex;align-items:center;gap:8px;margin-top:10px;}
+    .stap-eq{font-size:1.3rem;font-weight:700;color:var(--muted);width:22px;text-align:center;flex-shrink:0;}
+
+    /* Invoer-wrap */
+    .iv-wrap{
+      flex:1;min-height:70px;
+      background:var(--surface2);border:2px solid var(--border);border-radius:10px;
+      display:flex;align-items:center;justify-content:flex-start;
+      cursor:text;transition:border-color .2s,background .2s;position:relative;padding:6px 16px;
+      gap:6px;flex-wrap:wrap;
+    }
+    .iv-wrap.actief{border-color:var(--accent);background:rgba(91,141,238,.06);}
+    .iv-wrap.correct{border-color:var(--success)!important;background:rgba(76,187,138,.08)!important;}
+    .iv-wrap.fout{border-color:var(--danger)!important;background:rgba(224,87,87,.08)!important;}
+    .iv-wrap.disabled{opacity:.65;cursor:not-allowed;pointer-events:none;}
+
+    /* Breuk-element binnen invoerveld */
+    .iv-frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;}
+    .iv-frac .iv-streep{width:100%;min-width:40px;height:2px;background:var(--muted);border-radius:2px;margin:2px 0;}
+    .iv-frac input{
+      background:transparent;border:none;outline:none;
+      font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text);
+      text-align:center;width:60px;padding:1px 4px;caret-color:var(--accent);
+    }
+    .iv-frac input::placeholder{color:transparent;}
+
+    /* Operator-span binnen invoerveld */
+    .iv-op{font-size:1.2rem;font-weight:800;color:var(--text);padding:0 4px;display:inline-flex;align-items:center;}
+
+    /* Buffer cursor */
+    .iv-cursor{
+      font-size:1.2rem;font-weight:800;color:var(--text);
+      display:inline-flex;align-items:center;min-width:4px;
+    }
+    .iv-cursor::after{content:'';}
+    .iv-wrap.actief .iv-cursor::after{content:'|';color:var(--accent);animation:blink 1s step-end infinite;font-weight:300;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+    /* Geheel getal invoer */
+    .iv-int input{
+      background:transparent;border:none;outline:none;
+      font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text);
+      text-align:center;width:70px;padding:1px 4px;caret-color:var(--accent);
+    }
+    .iv-int input::placeholder{color:transparent;}
+
+    /* + knop */
+    .plus-btn{
+      width:30px;height:30px;border-radius:50%;
+      border:2px solid rgba(91,141,238,.3);background:rgba(91,141,238,.1);
+      color:var(--accent);font-size:1.1rem;font-weight:700;
+      cursor:pointer;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;
+      transition:all .2s;font-family:'Outfit',sans-serif;
+    }
+    .plus-btn:hover:not(:disabled){background:rgba(91,141,238,.22);border-color:var(--accent);}
+    .plus-btn:disabled{opacity:.3;cursor:not-allowed;}
+
+    /* KNOPPEN */
+    .knoppen-rij{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;}
+    .btn{padding:12px 22px;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .2s;}
+    .btn:disabled{opacity:.35;cursor:not-allowed;}
+    .btn-primair{background:var(--accent);color:white;}
+    .btn-primair:not(:disabled):hover{opacity:.85;transform:translateY(-1px);}
+    .btn-succes{background:var(--success);color:#0c2e1c;}
+    .btn-succes:not(:disabled):hover{opacity:.85;transform:translateY(-1px);}
+
+    /* FEEDBACK */
+    .feedback-box{margin-top:20px;padding:16px 20px;border-radius:10px;font-size:.92rem;line-height:1.7;display:none;animation:fadeIn .25s ease;}
+    .feedback-box.succes{background:rgba(76,187,138,.1);border:1px solid rgba(76,187,138,.3);color:var(--success);font-weight:600;}
+    .feedback-box.geel{background:rgba(245,197,66,.08);border:1px solid rgba(245,197,66,.3);color:var(--warning);}
+    .feedback-box.rood{background:rgba(224,87,87,.09);border:1px solid rgba(224,87,87,.3);color:var(--danger);}
+
+    /* REKENREGEL */
+    .rr-blok{margin-top:16px;background:var(--surface2);border:1px solid rgba(91,141,238,.2);border-radius:10px;padding:16px 20px;display:none;animation:fadeIn .25s ease;}
+    .rr-blok .rr-titel{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);margin-bottom:10px;}
+    .rr-blok ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
+    .rr-blok ul li{display:flex;gap:10px;font-size:.88rem;color:var(--text);line-height:1.55;}
+    .rr-blok ul li::before{content:'•';color:var(--accent);font-size:1.1rem;flex-shrink:0;}
+    .rr-blok .rr-sub{font-size:.88rem;color:var(--text);line-height:1.55;padding-left:20px;margin-top:2px;}
+
+    /* UITWERKING in definitieve feedback */
+    .uitwerking{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+    .uitw-rij{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .uitw-eq{font-size:1rem;color:var(--muted);font-weight:700;flex-shrink:0;}
+    .uitw-term{display:inline-flex;flex-direction:column;align-items:center;font-size:1rem;font-weight:800;line-height:1;vertical-align:middle;}
+    .uitw-term .ut{padding:2px 6px;}
+    .uitw-term .us{width:100%;min-width:24px;height:2px;background:currentColor;margin:2px 0;}
+    .uitw-term .un{padding:2px 6px;}
+    .uitw-op{font-size:1rem;font-weight:800;color:var(--muted);padding:0 4px;}
+
+    /* EINDSCHERM */
+    .eindscherm{text-align:center;padding:48px 24px;animation:fadeIn .4s ease;}
+    .eind-emoji{font-size:3.5rem;margin-bottom:16px;}
+    .eind-punten{font-size:3rem;font-weight:800;color:var(--accent);margin-bottom:8px;}
+    .eind-score-label{font-size:1rem;color:var(--muted);margin-bottom:16px;}
+    .score-badge{display:inline-block;font-size:2rem;font-weight:800;padding:10px 32px;border-radius:12px;margin-bottom:28px;}
+    .score-badge.A{background:rgba(168,230,161,.15);color:#a8e6a1;border:2px solid rgba(168,230,161,.4);}
+    .score-badge.B{background:rgba(255,244,163,.12);color:#fff4a3;border:2px solid rgba(255,244,163,.35);}
+    .score-badge.C{background:rgba(255,203,164,.12);color:#ffcba4;border:2px solid rgba(255,203,164,.35);}
+    .eind-bericht{font-size:1rem;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+
+    .b-inline{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.9em;font-weight:800;line-height:1;margin:0 4px;}
+    .b-inline .bi-streep{width:100%;min-width:18px;height:2px;background:currentColor;margin:1px 0;}
+
+    .info-tekst{font-size:.78rem;color:var(--muted);margin-top:10px;}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="index.html" class="back-btn">← Terug naar oefeningen</a>
+    <div class="page-title">
+      <h1>➕ Breuken optellen en aftrekken</h1>
+      <span id="user-label">Laden...</span>
+    </div>
+  </header>
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span id="prog-tekst">Oefening 1 van 6</span>
+      <span id="score-live">0 / 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+  </div>
+  <div id="inhoud"></div>
+</div>
+
+<script type="module">
+import { db } from './config.js';
+import { doc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+/* ═══════════════════════════════════════════════════════
+   CONSTANTEN & STATE
+═══════════════════════════════════════════════════════ */
+const TOTAAL = 6;
+const TYPE_NR = 3; // pas aan in config.js
+
+let user=null, opgaven=[], huidigeIdx=0;
+let punten=0, eerstePoging=0, tweedePoging=0, foutGegaan=0, pogingTeller=0;
+let stappen=[];   // array van stap-objecten voor huidige oefening
+let actief=null;  // { stapIdx, obj }
+
+/* ═══════════════════════════════════════════════════════
+   WISKUNDE HELPERS
+═══════════════════════════════════════════════════════ */
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){let t=b;b=a%b;a=t;}return a;};
+const lcm=(a,b)=>Math.abs(a*b)/gcd(a,b);
+const rand=(lo,hi)=>Math.floor(Math.random()*(hi-lo+1))+lo;
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+
+// Reduceer een breuk naar laagste termen; geeft {t,n} terug
+function reduceer(t,n){
+  if(n===0) return {t,n};
+  const g=gcd(Math.abs(t),Math.abs(n));
+  let rt=t/g, rn=n/g;
+  if(rn<0){rt=-rt;rn=-rn;}
+  return {t:rt,n:rn};
+}
+
+// Som of verschil van twee breuken, geeft gereduceerde breuk
+function berekenResultaat(t1,n1,op,t2,n2){
+  const l=lcm(n1,n2);
+  const nt1=t1*(l/n1);
+  const nt2=t2*(l/n2);
+  const res=op==='+'?nt1+nt2:nt1-nt2;
+  return reduceer(res,l);
+}
+
+// Controleer of twee breuken wiskundig gelijk zijn
+function breukGelijk(t1,n1,t2,n2){return t1*n2===t2*n1;}
+
+/* ═══════════════════════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════════════════════ */
+function checkLogin(){
+  const s=localStorage.getItem('wiskunde_user');
+  if(!s){window.location.href='login.html';return null;}
+  try{
+    const u=JSON.parse(s);
+    if(u.isAdmin){window.location.href='dashboard.html';return null;}
+    document.getElementById('user-label').textContent=u.naam||u.email;
+    return u;
+  }catch(e){localStorage.removeItem('wiskunde_user');window.location.href='login.html';return null;}
+}
+
+/* ═══════════════════════════════════════════════════════
+   BREUK GENEREREN
+═══════════════════════════════════════════════════════ */
+const NOEMERS=[2,3,4,5,6,7,8,9,10,15,20];
+
+function irreducibel(kanNegatief=false){
+  let t,n;
+  do{n=pick(NOEMERS);t=rand(1,n-1);}while(gcd(t,n)!==1);
+  if(kanNegatief) t=-t;
+  return {t,n};
+}
+
+function vereenvoudigbaar(kanNegatief=false){
+  let t,n,att=0;
+  do{
+    if(++att>300) return irreducibel(kanNegatief);
+    const b=irreducibel();
+    const fs=[2,3,4,5].filter(f=>NOEMERS.includes(b.n*f)&&b.t*f<b.n*f);
+    if(!fs.length) continue;
+    const f=pick(fs);t=b.t*f;n=b.n*f;
+  }while(gcd(t,n)===1||!NOEMERS.includes(n));
+  if(kanNegatief) t=-t;
+  return {t,n};
+}
+
+function controleerMax(t1,n1,t2,n2){
+  const l=lcm(n1,n2);
+  return Math.abs(t1*(l/n1))<=100&&Math.abs(t2*(l/n2))<=100&&l<=100;
+}
+
+// Genereer een paar breuken met willekeurige operator
+// gen1/gen2 zijn functies die een breuk genereren
+function maakOpgave(gen1,gen2,opties={}){
+  const {tweedeNegatief=false,ongelijknamig=true,operator=null}=opties;
+  for(let i=0;i<500;i++){
+    const b1=gen1();
+    const b2=gen2();
+    if(ongelijknamig&&b1.n===b2.n) continue;
+    if(!controleerMax(b1.t,b1.n,b2.t,b2.n)) continue;
+    const op=operator||(Math.random()<.5?'+':'-');
+    return {b1,b2,op};
+  }
+  return {b1:{t:1,n:2},b2:{t:1,n:3},op:'+'};
+}
+
+function genereerOpgaven(){
+  const L=[];
+
+  // Opgave 1 & 2: positieve irreducibele ongelijknamige breuken
+  // afwisselend + en -
+  const start=Math.random()<.5;
+  L.push({...maakOpgave(()=>irreducibel(),()=>irreducibel(),{ongelijknamig:true,operator:start?'+':'-'}),nr:1});
+  L.push({...maakOpgave(()=>irreducibel(),()=>irreducibel(),{ongelijknamig:true,operator:start?'-':'+'}),nr:2});
+
+  // Opgave 3: minstens één vereenvoudigbare breuk, positief, ongelijknamig
+  const s3=Math.random()<.5;
+  L.push({...maakOpgave(
+    ()=>s3?vereenvoudigbaar():irreducibel(),
+    ()=>s3?irreducibel():vereenvoudigbaar(),
+    {ongelijknamig:true}
+  ),nr:3});
+
+  // Opgave 4 & 5: tweede breuk negatief (in de teller), eerste mag alles
+  // bewerking willekeurig + of -
+  for(let nr=4;nr<=5;nr++){
+    const eersteVereenvoudigbaar=Math.random()<.5;
+    L.push({...maakOpgave(
+      ()=>eersteVereenvoudigbaar?vereenvoudigbaar(Math.random()<.5):irreducibel(Math.random()<.5),
+      ()=>Math.random()<.5?vereenvoudigbaar(true):irreducibel(true), // tweede gegarandeerd negatief
+      {ongelijknamig:true}
+    ),nr});
+  }
+
+  // Opgave 6: breuk + geheel getal
+  let b1_6,g;
+  for(let i=0;i<500;i++){
+    b1_6=irreducibel(Math.random()<.3);
+    g=rand(-10,10); if(g===0) continue;
+    // noemer van geheel getal = 1
+    if(controleerMax(b1_6.t,b1_6.n,g,1)) break;
+  }
+  const op6=Math.random()<.5?'+':'-';
+  L.push({b1:b1_6,b2:{t:g,n:1},op:op6,nr:6,isGeheel:true});
+
+  return L;
+}
+
+/* ═══════════════════════════════════════════════════════
+   VOORTGANG
+═══════════════════════════════════════════════════════ */
+function updateVoortgang(){
+  document.getElementById('prog-fill').style.width=(huidigeIdx/TOTAAL*100)+'%';
+  document.getElementById('prog-tekst').textContent=huidigeIdx<TOTAAL?`Oefening ${huidigeIdx+1} van ${TOTAAL}`:'Klaar!';
+  document.getElementById('score-live').textContent=`${punten} / ${huidigeIdx}`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HTML HELPERS
+═══════════════════════════════════════════════════════ */
+function breukTermHTML(t,n,klasse='opgave-term'){
+  if(n===1) return `<span class="${klasse}"><span class="bt">${t}</span></span>`;
+  return `<span class="${klasse}"><span class="bt">${t}</span><span class="bs"></span><span class="bn">${n}</span></span>`;
+}
+
+function biHTML(t,n){
+  if(n===1) return `<span class="b-inline"><span>${t}</span></span>`;
+  return `<span class="b-inline"><span>${t}</span><span class="bi-streep"></span><span>${n}</span></span>`;
+}
+
+// Uitwerking breuk HTML (voor definitieve feedback)
+function uitwHTML(t,n){
+  if(n===1) return `<span class="uitw-term"><span class="ut">${t}</span></span>`;
+  return `<span class="uitw-term"><span class="ut">${t}</span><span class="us"></span><span class="un">${n}</span></span>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   INVOER COMPONENT
+   Een invoerveld kan bevatten:
+   - tokens: array van {type:'frac',teller,noemer,el} | {type:'op',waarde,el} | {type:'int',waarde,el}
+   - cursorEl: het .iv-cursor element (knippert, staat altijd aan het einde)
+   - obj: het stap-object
+═══════════════════════════════════════════════════════ */
+
+function maakStapObj(stapIdx){
+  const wrap=document.createElement('div');
+  wrap.className='iv-wrap';
+  wrap.dataset.idx=stapIdx;
+
+  const cursEl=document.createElement('span');
+  cursEl.className='iv-cursor';
+  wrap.appendChild(cursEl);
+
+  const obj={
+    tokens:[],   // wat al ingevoerd is
+    bufTekst:'', // getal dat getypt wordt (nog geen /)
+    fase:'buf',  // 'buf' = bezig met typen getal, 'idle' = klaar voor nieuwe token
+    wrap, cursEl,
+    actieveFracEl:null,  // fracDiv als cursor in noemer zit
+    rij:null, plusBtn:null,
+    teller:null,noemer:null // voor enkelvoudige breuk (eindantwoord)
+  };
+
+  // Klik op wrap
+  wrap.addEventListener('mousedown',e=>{
+    if(wrap.classList.contains('disabled')) return;
+    const opInput=e.target.tagName==='INPUT';
+    if(!opInput) e.preventDefault();
+    activeer(stapIdx,obj);
+    if(!opInput&&obj.actieveFracEl){
+      // klik op wrap maar niet op input: focus naar noemer van actieve frac
+      const ni=obj.actieveFracEl.querySelector('input[data-deel="noemer"]');
+      if(ni) ni.focus();
+    }
+  });
+
+  return obj;
+}
+
+function activeer(stapIdx,obj){
+  document.querySelectorAll('.iv-wrap').forEach(w=>w.classList.remove('actief'));
+  obj.wrap.classList.add('actief');
+  actief={stapIdx,obj};
+}
+
+// Globale mousedown: deactiveer als buiten wrap geklikt
+document.addEventListener('mousedown',e=>{
+  if(!actief) return;
+  if(!e.target.closest('.iv-wrap')){
+    document.querySelectorAll('.iv-wrap').forEach(w=>w.classList.remove('actief'));
+    actief=null;
+  }
+});
+
+/* ═══════════════════════════════════════════════════════
+   KEYBOARD HANDLER
+═══════════════════════════════════════════════════════ */
+document.addEventListener('keydown',e=>{
+  if(!actief) return;
+  const {stapIdx,obj}=actief;
+  if(obj.wrap.classList.contains('disabled')) return;
+
+  // Als we in een fracDiv zitten (teller of noemer input actief)
+  if(obj.actieveFracEl){
+    const ti=obj.actieveFracEl.querySelector('input[data-deel="teller"]');
+    const ni=obj.actieveFracEl.querySelector('input[data-deel="noemer"]');
+    const focused=document.activeElement;
+
+    if(focused===ni){
+      if(e.key==='Backspace'&&ni.value===''){
+        e.preventDefault();
+        // Ga terug naar teller
+        ti.focus();ti.setSelectionRange(ti.value.length,ti.value.length);
+        return;
+      }
+      if(e.key==='ArrowRight'){
+        e.preventDefault();
+        // Verlaat noemer, cursor staat rechts naast breuk
+        verlaatveld(obj);
+        return;
+      }
+      return; // rest native
+    }
+    if(focused===ti){
+      if(e.key==='Backspace'&&ti.value===''){
+        e.preventDefault();
+        verwijderLaatsteToken(stapIdx,obj);
+        return;
+      }
+      return; // rest native
+    }
+    return;
+  }
+
+  // Buffer fase
+  if(e.key.match(/^[0-9]$/)){
+    e.preventDefault();
+    obj.bufTekst+=e.key;
+    renderCursor(obj);
+    syncStapData(stapIdx,obj);
+    updateCtrlKnop();
+  } else if(e.key==='-'&&obj.bufTekst===''){
+    e.preventDefault();
+    obj.bufTekst='-';
+    renderCursor(obj);
+    syncStapData(stapIdx,obj);
+  } else if(e.key==='/'&&obj.bufTekst!==''&&obj.bufTekst!=='-'){
+    e.preventDefault();
+    const t=parseInt(obj.bufTekst);
+    obj.bufTekst='';
+    renderCursor(obj);
+    voegBreukToe(stapIdx,obj,t);
+  } else if((e.key==='+'||e.key==='-')&&obj.bufTekst===''){
+    // Operator invoegen (alleen als er al iets staat)
+    if(obj.tokens.length>0){
+      e.preventDefault();
+      voegOperatorToe(stapIdx,obj,e.key);
+    }
+  } else if(e.key==='Backspace'){
+    e.preventDefault();
+    if(obj.bufTekst){
+      obj.bufTekst=obj.bufTekst.slice(0,-1);
+      renderCursor(obj);
+      syncStapData(stapIdx,obj);
+      updateCtrlKnop();
+    } else {
+      verwijderLaatsteToken(stapIdx,obj);
+    }
+  }
+});
+
+function renderCursor(obj){
+  obj.cursEl.textContent=obj.bufTekst;
+}
+
+function verlaatveld(obj){
+  // Verlaat de actieve fracDiv, cursor staat rechts naast breuk
+  obj.actieveFracEl=null;
+  obj.wrap.focus&&obj.wrap.focus();
+  // Zorg dat cursEl zichtbaar is
+  obj.wrap.appendChild(obj.cursEl);
+  // Nu kunnen + of - of nieuwe cijfers getypt worden
+}
+
+function voegBreukToe(stapIdx,obj,teller){
+  const fracDiv=document.createElement('div');
+  fracDiv.className='iv-frac';
+
+  const ti=document.createElement('input');
+  ti.type='text';ti.inputMode='numeric';ti.autocomplete='off';ti.spellcheck=false;
+  ti.dataset.deel='teller';ti.value=teller;
+
+  const sd=document.createElement('div');sd.className='iv-streep';
+
+  const ni=document.createElement('input');
+  ni.type='text';ni.inputMode='numeric';ni.autocomplete='off';ni.spellcheck=false;
+  ni.dataset.deel='noemer';
+
+  fracDiv.appendChild(ti);fracDiv.appendChild(sd);fracDiv.appendChild(ni);
+
+  // Voeg voor de cursEl in
+  obj.wrap.insertBefore(fracDiv,obj.cursEl);
+
+  const token={type:'frac',teller:parseInt(ti.value)||null,noemer:null,el:fracDiv,ti,ni};
+  obj.tokens.push(token);
+  obj.actieveFracEl=fracDiv;
+
+  ti.addEventListener('input',()=>{
+    token.teller=parseInt(ti.value)||null;
+    syncStapData(stapIdx,obj);updateCtrlKnop();
+  });
+  ti.addEventListener('focus',()=>{activeer(stapIdx,obj);obj.actieveFracEl=fracDiv;});
+  ti.addEventListener('keydown',e=>{
+    if(e.key==='Backspace'&&ti.value===''){
+      e.preventDefault();
+      verwijderLaatsteToken(stapIdx,obj);
+    }
+  });
+
+  ni.addEventListener('input',()=>{
+    token.noemer=parseInt(ni.value)||null;
+    syncStapData(stapIdx,obj);updateCtrlKnop();
+  });
+  ni.addEventListener('focus',()=>{activeer(stapIdx,obj);obj.actieveFracEl=fracDiv;});
+  ni.addEventListener('keydown',e=>{
+    if(e.key==='Backspace'&&ni.value===''){
+      e.preventDefault();
+      ti.focus();ti.setSelectionRange(ti.value.length,ti.value.length);
+    }
+    if(e.key==='ArrowRight'){
+      e.preventDefault();
+      verlaatveld(obj);
+    }
+  });
+
+  ni.focus();
+  syncStapData(stapIdx,obj);
+  updateCtrlKnop();
+}
+
+function voegOperatorToe(stapIdx,obj,opStr){
+  const span=document.createElement('span');
+  span.className='iv-op';
+  span.textContent=' '+opStr+' ';
+  obj.wrap.insertBefore(span,obj.cursEl);
+  obj.tokens.push({type:'op',waarde:opStr,el:span});
+  obj.actieveFracEl=null;
+  syncStapData(stapIdx,obj);updateCtrlKnop();
+}
+
+function verwijderLaatsteToken(stapIdx,obj){
+  if(obj.tokens.length===0) return;
+  const last=obj.tokens[obj.tokens.length-1];
+  last.el.remove();
+  obj.tokens.pop();
+  // Als het een frac was, actieveFracEl resetten
+  if(last.type==='frac') obj.actieveFracEl=null;
+  syncStapData(stapIdx,obj);updateCtrlKnop();
+  renderCursor(obj);
+}
+
+function syncStapData(stapIdx,obj){
+  if(stappen[stapIdx]){
+    stappen[stapIdx].tokens=[...obj.tokens];
+    stappen[stapIdx].bufTekst=obj.bufTekst;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PARSE INVOER
+   Leest de tokens van een stap en geeft een genormaliseerde
+   representatie terug.
+   Mogelijkheden:
+   - {soort:'geheel', waarde:n}   (enkel getal zonder /)
+   - {soort:'breuk', t, n}        (enkelvoudige breuk)
+   - {soort:'bewerking', t1,n1,op,t2,n2}  (twee breuken met operator)
+   - null  (leeg of ongeldig)
+═══════════════════════════════════════════════════════ */
+function parseTokens(tokens, bufTekst=''){
+  // Geheel getal: alleen bufTekst, geen tokens
+  if((!tokens||tokens.length===0) && bufTekst&&bufTekst!=='-'){
+    const v=parseInt(bufTekst);
+    if(!isNaN(v)) return {soort:'geheel',waarde:v};
+    return null;
+  }
+  if(!tokens||tokens.length===0) return null;
+
+  // Haal lege/incomplete tokens weg
+  const vt=tokens.filter(tk=>{
+    if(tk.type==='frac') return tk.teller!==null&&tk.noemer!==null&&tk.noemer!==0;
+    if(tk.type==='op') return true;
+    if(tk.type==='int') return tk.waarde!==null;
+    return false;
+  });
+
+  // Als geen geldige tokens maar wel bufTekst: geheel getal
+  if(vt.length===0){
+    if(bufTekst&&bufTekst!=='-'){
+      const v=parseInt(bufTekst);
+      if(!isNaN(v)) return {soort:'geheel',waarde:v};
+    }
+    return null;
+  }
+
+  // Enkelvoudige breuk
+  if(vt.length===1&&vt[0].type==='frac'){
+    return {soort:'breuk',t:vt[0].teller,n:vt[0].noemer};
+  }
+
+  // Bewerking: frac op frac
+  if(vt.length===3&&vt[0].type==='frac'&&vt[1].type==='op'&&vt[2].type==='frac'){
+    return {soort:'bewerking',t1:vt[0].teller,n1:vt[0].noemer,op:vt[1].waarde,t2:vt[2].teller,n2:vt[2].noemer};
+  }
+
+  return null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONTROLEER KNOP
+═══════════════════════════════════════════════════════ */
+function updateCtrlKnop(){
+  const btn=document.getElementById('ctrl-btn');
+  if(!btn) return;
+  // Actief als laatste stap iets geldigs heeft
+  const laatste=getLaatsteNietLeeg();
+  btn.disabled=!laatste;
+}
+
+function getLaatsteNietLeeg(){
+  for(let i=stappen.length-1;i>=0;i--){
+    const p=parseTokens(stappen[i].tokens, stappen[i].bufTekst||'');
+    if(p) return {stapIdx:i,parsed:p};
+  }
+  return null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   OEFENING TONEN
+═══════════════════════════════════════════════════════ */
+function toonOefening(){
+  if(huidigeIdx>=TOTAAL){toonEindscherm();return;}
+  pogingTeller=0;stappen=[];actief=null;
+  updateVoortgang();
+  const oef=opgaven[huidigeIdx];
+
+  const ih=document.getElementById('inhoud');ih.innerHTML='';
+  const kaart=document.createElement('div');kaart.className='oefening-kaart';
+
+  // Label
+  const lbl=document.createElement('span');lbl.className='vraag-label';lbl.textContent='Bereken';
+  kaart.appendChild(lbl);
+
+  // Opgave
+  const opgBox=document.createElement('div');opgBox.className='opgave-box';
+  // Eerste term
+  opgBox.innerHTML=breukTermHTML(oef.b1.t,oef.b1.n);
+  // Operator
+  const opSpan=document.createElement('span');opSpan.className='opgave-op';opSpan.textContent=oef.op;
+  opgBox.appendChild(opSpan);
+  // Tweede term
+  const t2html=oef.isGeheel
+    ? `<span class="opgave-term"><span class="bt">${oef.b2.t}</span></span>`
+    : breukTermHTML(oef.b2.t,oef.b2.n);
+  opgBox.insertAdjacentHTML('beforeend',t2html);
+  kaart.appendChild(opgBox);
+
+  // Invoer kolom
+  const kolom=document.createElement('div');kolom.className='invoer-kolom';kolom.id='invoer-kolom';
+
+  // Eerste stap
+  voegStapToe(kolom,oef);
+
+  kaart.appendChild(kolom);
+
+  // Info tekst
+  const info=document.createElement('p');info.className='info-tekst';
+  info.textContent='Druk op + voor een extra tussenstap als dat nodig is.';
+  kaart.appendChild(info);
+
+  // Knoppen
+  const kr=document.createElement('div');kr.className='knoppen-rij';
+  const cb=document.createElement('button');cb.className='btn btn-primair';cb.id='ctrl-btn';cb.textContent='Controleer';cb.disabled=true;
+  const vb=document.createElement('button');vb.className='btn btn-succes';vb.id='volg-btn';vb.textContent='Volgende oefening →';vb.style.display='none';
+  kr.appendChild(cb);kr.appendChild(vb);kaart.appendChild(kr);
+
+  const fb=document.createElement('div');fb.className='feedback-box';fb.id='fb-box';kaart.appendChild(fb);
+  const rr=document.createElement('div');rr.className='rr-blok';rr.id='rr-blok';kaart.appendChild(rr);
+
+  ih.appendChild(kaart);
+  cb.addEventListener('click',controleer);
+  vb.addEventListener('click',()=>toonOefening());
+
+  // Focus eerste veld
+  setTimeout(()=>{
+    if(stappen.length>0) activeer(0,stappen[0]);
+  },60);
+}
+
+function voegStapToe(kolom,oef){
+  const idx=stappen.length;
+  const rij=document.createElement('div');rij.className='stap-rij';
+
+  const eq=document.createElement('div');eq.className='stap-eq';eq.textContent='=';
+  rij.appendChild(eq);
+
+  const obj=maakStapObj(idx);
+  rij.appendChild(obj.wrap);
+
+  const pb=document.createElement('button');pb.className='plus-btn';pb.textContent='+';pb.title='Extra tussenstap toevoegen';
+  rij.appendChild(pb);
+  obj.rij=rij;obj.plusBtn=pb;
+
+  const stapData={tokens:[],bufTekst:'',obj,rij,plusBtn:pb};
+  stappen.push(stapData);
+
+  pb.addEventListener('click',()=>{
+    if(stappen.length>=5) return;
+    pb.style.display='none';
+    voegStapToe(kolom,oef);
+    if(stappen.length>=5) stappen[stappen.length-1].plusBtn.disabled=true;
+  });
+
+  if(stappen.length>=5) pb.disabled=true;
+  kolom.appendChild(rij);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONTROLEER
+═══════════════════════════════════════════════════════ */
+function controleer(){
+  const oef=opgaven[huidigeIdx];
+  const fb=document.getElementById('fb-box');
+  const rr=document.getElementById('rr-blok');
+  const cb=document.getElementById('ctrl-btn');
+  const vb=document.getElementById('volg-btn');
+
+  // Bereken het correcte eindantwoord
+  const corrRes=berekenResultaat(oef.b1.t,oef.b1.n,oef.op,oef.b2.t,oef.b2.n);
+  // Als noemer 1: eindantwoord is geheel getal
+  const corrIsGeheel=corrRes.n===1;
+
+  // Zoek het antwoord: laatste stap met inhoud
+  const laatste=getLaatsteNietLeeg();
+  if(!laatste){return;}
+  const {stapIdx:antIdx,parsed:antParsed}=laatste;
+
+  // Valideer tussenstappen (alles behalve de laatste niet-lege stap)
+  const tussenFout=[];
+  for(let i=0;i<antIdx;i++){
+    const p=parseTokens(stappen[i].tokens, stappen[i].bufTekst||'');
+    if(!p) continue; // leeg = negeer
+    if(!valideerTussenstap(p,corrRes)){
+      tussenFout.push(i);
+    }
+  }
+
+  // Valideer het antwoord
+  const {ok:antOk,reden}=valideerAntwoord(antParsed,corrRes,corrIsGeheel);
+
+  // Markeer stappen
+  for(let i=0;i<antIdx;i++){
+    const p=parseTokens(stappen[i].tokens);
+    if(!p) continue;
+    stappen[i].obj.wrap.classList.toggle('fout',tussenFout.includes(i));
+    stappen[i].obj.wrap.classList.toggle('correct',!tussenFout.includes(i));
+  }
+  stappen[antIdx].obj.wrap.classList.toggle('correct',antOk);
+  stappen[antIdx].obj.wrap.classList.toggle('fout',!antOk);
+
+  const tussenOk=tussenFout.length===0;
+
+  /* ── ALLES GOED ── */
+  if(antOk&&tussenOk){
+    if(pogingTeller===0){punten+=1;eerstePoging++;}else{punten+=.5;tweedePoging++;}
+    huidigeIdx++;
+    fb.className='feedback-box succes';
+    fb.innerHTML=pogingTeller===0?'✅ Correct! Goed gedaan!':'✅ Correct bij de tweede poging!';
+    fb.style.display='block';rr.style.display='none';
+    cb.style.display='none';vb.style.display='inline-block';
+    vergrendel();updateVoortgang();
+    return;
+  }
+
+  /* ── ANTWOORD GOED, TUSSENSTAPPEN FOUT ── */
+  if(antOk&&!tussenOk){
+    if(pogingTeller===0){
+      fb.className='feedback-box geel';
+      fb.innerHTML='Je hebt het juiste antwoord, maar niet de juiste tussenstappen. Pas de tussenstappen aan.';
+      fb.style.display='block';rr.style.display='none';
+      pogingTeller=1;
+      setTimeout(()=>{resetFout(tussenFout,antIdx,false,oef);updateCtrlKnop();},900);
+    } else {
+      foutGegaan++;huidigeIdx++;
+      fb.className='feedback-box rood';
+      fb.innerHTML='Je hebt het juiste antwoord, maar niet de juiste tussenstappen. Daarom wordt deze oefening fout gerekend.';
+      fb.style.display='block';rr.style.display='none';
+      cb.style.display='none';vb.style.display='inline-block';
+      vergrendel();updateVoortgang();
+    }
+    return;
+  }
+
+  /* ── ANTWOORD FOUT ── */
+  if(pogingTeller===0){
+    pogingTeller=1;
+    fb.className='feedback-box geel';
+    // Speciale gevallen
+    if(reden==='nogBewerking'){
+      fb.innerHTML='Dit is nog niet de einduitkomst. Reken verder uit.';
+      fb.style.display='block';rr.style.display='none';
+    } else if(reden==='nogVereenvoudigen'){
+      fb.innerHTML='Dit is nog niet de einduitkomst, want de breuk kan nog vereenvoudigd worden.';
+      fb.style.display='block';rr.style.display='none';
+    } else {
+      fb.innerHTML='Je antwoord is niet juist. Bekijk de rekenregel en probeer opnieuw.';
+      fb.style.display='block';
+      rr.innerHTML=maakRekenregel(oef);
+      rr.style.display='block';
+    }
+    setTimeout(()=>{resetFout(tussenFout,antIdx,true,oef);updateCtrlKnop();},900);
+  } else {
+    // Definitief fout
+    foutGegaan++;huidigeIdx++;
+    rr.style.display='none';
+    fb.className='feedback-box rood';
+    fb.innerHTML=maakDefinitieveFeedback(antParsed,corrRes,corrIsGeheel,oef);
+    fb.style.display='block';
+    cb.style.display='none';vb.style.display='inline-block';
+    vergrendel();updateVoortgang();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   VALIDATIE
+═══════════════════════════════════════════════════════ */
+function valideerTussenstap(parsed,corrRes){
+  if(parsed.soort==='bewerking'){
+    const res=berekenResultaat(parsed.t1,parsed.n1,parsed.op,parsed.t2,parsed.n2);
+    return breukGelijk(res.t,res.n,corrRes.t,corrRes.n);
+  }
+  if(parsed.soort==='breuk'){
+    return breukGelijk(parsed.t,parsed.n,corrRes.t,corrRes.n);
+  }
+  if(parsed.soort==='geheel'){
+    // Geheel getal is gelijk als corrRes ook een geheel getal is
+    return corrRes.n===1&&parsed.waarde===corrRes.t;
+  }
+  return false;
+}
+
+function valideerAntwoord(parsed,corrRes,corrIsGeheel){
+  if(!parsed) return {ok:false,reden:'leeg'};
+
+  // Bewerking: nog niet eindantwoord
+  if(parsed.soort==='bewerking'){
+    const res=berekenResultaat(parsed.t1,parsed.n1,parsed.op,parsed.t2,parsed.n2);
+    if(breukGelijk(res.t,res.n,corrRes.t,corrRes.n)){
+      return {ok:false,reden:'nogBewerking'};
+    }
+    return {ok:false,reden:'fout'};
+  }
+
+  // Geheel getal
+  if(parsed.soort==='geheel'){
+    if(!corrIsGeheel) return {ok:false,reden:'fout'}; // correct antwoord is een breuk
+    return parsed.waarde===corrRes.t ? {ok:true} : {ok:false,reden:'fout'};
+  }
+
+  // Breuk
+  if(parsed.soort==='breuk'){
+    // Wiskundig gelijk?
+    if(!breukGelijk(parsed.t,parsed.n,corrRes.t,corrRes.n)) return {ok:false,reden:'fout'};
+    // Gereduceerd?
+    const g=gcd(Math.abs(parsed.t),Math.abs(parsed.n));
+    if(g>1) return {ok:false,reden:'nogVereenvoudigen'};
+    if(parsed.n<0) return {ok:false,reden:'fout'};
+    // Uitkomst is eigenlijk een geheel getal (noemer 1 na reductie)
+    if(corrIsGeheel) return {ok:false,reden:'nogVereenvoudigen'};
+    return {ok:true};
+  }
+
+  return {ok:false,reden:'fout'};
+}
+
+/* ═══════════════════════════════════════════════════════
+   REKENREGEL
+═══════════════════════════════════════════════════════ */
+function maakRekenregel(oef){
+  // Bepaal of de tweede breuk negatief is (opgave 4/5)
+  const tweedeNegatief=oef.b2.t<0;
+  return `<div class="rr-titel">REKENREGEL</div><ul>
+    <li>Schrijf, enkel als de tweede breuk negatief is, eenvoudiger.</li>
+    <li>Maak de breuken gelijknamig.</li>
+    <li>Behoud de noemer.<div class="rr-sub">Voer de bewerking uit met de tellers.</div></li>
+    <li>Schrijf het resultaat als een onvereenvoudigbare breuk.</li>
+  </ul>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DEFINITIEVE FEEDBACK + UITWERKING
+═══════════════════════════════════════════════════════ */
+function maakDefinitieveFeedback(antParsed,corrRes,corrIsGeheel,oef){
+  let html='Je antwoord is niet juist.<br>';
+  html+='<div class="uitwerking">'+maakUitwerking(oef,corrRes)+'</div>';
+  return html;
+}
+
+function maakUitwerking(oef,corrRes){
+  const {b1,b2,op}=oef;
+  const isGeheel=oef.isGeheel;
+  const b2eff=isGeheel?{t:b2.t,n:1}:b2;
+
+  const stps=[];
+
+  // Stap 0: de opgave zelf
+  stps.push({eq:null,t1:b1.t,n1:b1.n,op,t2:b2eff.t,n2:b2eff.n});
+
+  // Stap 1 (optioneel): eenvoudiger schrijven als tweede breuk negatief is
+  // a + (-b) → a - b  of  a - (-b) → a + b
+  let b1w={...b1},b2w={...b2eff},opW=op;
+  let vereenvoudigdStr=false;
+  if(b2eff.t<0){
+    if(op==='+'){opW='-';b2w={t:-b2eff.t,n:b2eff.n};}
+    else{opW='+';b2w={t:-b2eff.t,n:b2eff.n};}
+    stps.push({eq:'=',t1:b1w.t,n1:b1w.n,op:opW,t2:b2w.t,n2:b2w.n});
+    vereenvoudigdStr=true;
+  }
+
+  // Stap 2 (optioneel): breuken vereenvoudigen
+  const r1=reduceer(b1w.t,b1w.n);
+  const r2=reduceer(b2w.t,b2w.n);
+  const heeftVereenv=(r1.t!==b1w.t||r1.n!==b1w.n)||(r2.t!==b2w.t||r2.n!==b2w.n);
+  if(heeftVereenv){
+    stps.push({eq:'=',t1:r1.t,n1:r1.n,op:opW,t2:r2.t,n2:r2.n});
+  }
+  const v1={t:r1.t,n:r1.n},v2={t:r2.t,n:r2.n};
+
+  // Stap 3 (optioneel): gelijknamig maken
+  const l=lcm(v1.n,v2.n);
+  const g1t=v1.t*(l/v1.n),g2t=v2.t*(l/v2.n);
+  const alGelijknamig=v1.n===v2.n;
+  if(!alGelijknamig){
+    stps.push({eq:'=',t1:g1t,n1:l,op:opW,t2:g2t,n2:l});
+  }
+
+  // Stap 4: bewerking tellers
+  const resT=opW==='+'?g1t+g2t:g1t-g2t;
+  stps.push({eq:'=',t1:resT,n1:l,single:true});
+
+  // Stap 5 (optioneel): vereenvoudigen
+  const fin=reduceer(resT,l);
+  if(fin.t!==resT||fin.n!==l){
+    stps.push({eq:'=',t1:fin.t,n1:fin.n,single:true});
+  }
+
+  // Render
+  return stps.map((s)=>{
+    let rij=`<div class="uitw-rij">`;
+    if(s.eq) rij+=`<span class="uitw-eq">${s.eq}</span>`;
+    if(s.single){
+      // Geheel getal (noemer 1) of breuk
+      if(s.n1===1) rij+=`<span class="uitw-term"><span class="ut">${s.t1}</span></span>`;
+      else rij+=uitwHTML(s.t1,s.n1);
+    } else {
+      // Toon geheel getal of breuk per term
+      rij+=(s.n1===1)?`<span class="uitw-term"><span class="ut">${s.t1}</span></span>`:uitwHTML(s.t1,s.n1);
+      rij+=`<span class="uitw-op">${s.op}</span>`;
+      rij+=(s.n2===1)?`<span class="uitw-term"><span class="ut">${s.t2}</span></span>`:uitwHTML(s.t2,s.n2);
+    }
+    rij+='</div>';
+    return rij;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESET FOUTEN
+═══════════════════════════════════════════════════════ */
+function resetFout(tussenFout,antIdx,resetAntwoord,oef){
+  const kolom=document.getElementById('invoer-kolom');
+
+  // Bepaal het vroegste te-verwijderen-punt
+  const eersteHout=tussenFout.length>0?Math.min(...tussenFout):null;
+  const verwijderVanaf=eersteHout!==null?eersteHout:(resetAntwoord?antIdx:null);
+
+  if(verwijderVanaf===null){
+    // Niets te verwijderen
+    stappen.forEach(s=>s.obj.wrap.classList.remove('fout','correct','actief','disabled'));
+    return;
+  }
+
+  // Verwijder rijen
+  const teVerw=stappen.slice(verwijderVanaf);
+  teVerw.forEach(s=>s.rij.remove());
+  stappen.splice(verwijderVanaf);
+
+  // Herstel plusBtn van de nu-laatste stap
+  if(stappen.length>0){
+    const laatste=stappen[stappen.length-1];
+    laatste.plusBtn.style.display='flex';
+    laatste.plusBtn.disabled=stappen.length>=5;
+  }
+
+  // Verwijder klassen van overgebleven stappen
+  stappen.forEach(s=>s.obj.wrap.classList.remove('fout','correct','actief','disabled'));
+
+  // Voeg nieuwe lege stap toe
+  voegStapToe(kolom,oef);
+  // Reset bufTekst van overgebleven stappen
+  stappen.forEach(s=>{if(s.bufTekst===undefined)s.bufTekst='';});
+
+  // Focus
+  const nieuw=stappen[stappen.length-1];
+  if(nieuw) activeer(stappen.length-1,nieuw.obj);
+}
+
+function vergrendel(){
+  document.querySelectorAll('.iv-wrap').forEach(w=>{
+    w.classList.add('disabled');
+    w.querySelectorAll('input').forEach(i=>i.disabled=true);
+  });
+  document.querySelectorAll('.plus-btn').forEach(b=>b.disabled=true);
+  actief=null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   EINDSCHERM
+═══════════════════════════════════════════════════════ */
+function toonEindscherm(){
+  updateVoortgang();
+  let sc,em,ber;
+  if(punten>=5){sc='A';em='🌟';ber='Uitstekend! Je beheerst het optellen en aftrekken van breuken.';}
+  else if(punten>=4){sc='B';em='😊';ber='Goed gedaan! Nog een beetje oefenen en je hebt het helemaal onder de knie.';}
+  else{sc='C';em='📚';ber='Blijf oefenen. Je kan dit zeker verbeteren!';}
+  document.getElementById('inhoud').innerHTML=`
+    <div class="eindscherm">
+      <div class="eind-emoji">${em}</div>
+      <div class="eind-punten">${punten}/6</div>
+      <div class="eind-score-label">Je haalde ${punten}/6</div>
+      <div class="score-badge ${sc}">Score: ${sc}</div>
+      <div class="eind-bericht">${ber}</div>
+      <button class="btn btn-primair" id="terug-btn">← Terug naar oefeningen</button>
+    </div>`;
+  document.getElementById('terug-btn').addEventListener('click',()=>window.location.href='index.html');
+  slaanOp(sc);
+}
+
+async function slaanOp(sc){
+  try{
+    await updateDoc(doc(db,'leerlingen',user.email),{resultaten:arrayUnion({
+      type:TYPE_NR,datum:new Date().toISOString(),score:sc,
+      totaal:punten,eerste:eerstePoging,tweede:tweedePoging,fout:foutGegaan
+    })});
+  }catch(e){console.error('Opslaan mislukt:',e);}
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+user=checkLogin();
+if(user){opgaven=genereerOpgaven();toonOefening();}
+</script>
+</body>
+</html>
