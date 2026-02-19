@@ -699,7 +699,9 @@ function toonOefening(){
   opgBox.appendChild(opSpan);
   // Tweede term
   const t2html=oef.isGeheel
-    ? `<span class="opgave-term"><span class="bt">${oef.b2.t}</span></span>`
+    ? (oef.b2.t<0
+        ? `<span class="opgave-term"><span class="bt">(${oef.b2.t})</span></span>`
+        : `<span class="opgave-term"><span class="bt">${oef.b2.t}</span></span>`)
     : breukTermHTML(oef.b2.t,oef.b2.n);
   opgBox.insertAdjacentHTML('beforeend',t2html);
   kaart.appendChild(opgBox);
