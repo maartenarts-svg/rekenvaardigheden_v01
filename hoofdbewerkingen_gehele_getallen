@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gehele getallen – Wiskunde Oefenplatform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #20243a;
+      --border: rgba(255,255,255,0.08);
+      --text: #e8eaf0;
+      --muted: #8891aa;
+      --accent: #5b8dee;
+      --success: #4cbb8a;
+      --danger: #e05757;
+      --warning: #f5c542;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(91,141,238,0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(76,187,138,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .page-title h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .page-title span {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* ── VOORTGANGSBALK ── */
+    .progress-wrap {
+      margin-bottom: 28px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .progress-track {
+      height: 8px;
+      background: var(--surface);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #a0c4ff);
+      border-radius: 99px;
+      transition: width 0.5s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+
+    /* ── SCORE BALK ── */
+    .score-balk {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 20px;
+      font-size: 0.88rem;
+    }
+
+    .score-balk .label { color: var(--muted); }
+    .score-balk .waarde {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+
+    /* ── OEFENING KAART ── */
+    .oefening-kaart {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .opmerking {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 20px;
+      padding: 10px 14px;
+      border-left: 3px solid var(--accent);
+      background: rgba(91,141,238,0.07);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .vraag-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .vraag-tekst {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 28px;
+      color: var(--text);
+    }
+
+    /* ── TUSSENSTAP ── */
+    .stap-rij {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .equals {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--muted);
+      min-width: 24px;
+    }
+
+    .invoer {
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      width: 200px;
+      text-align: center;
+    }
+
+    .invoer:focus {
+      border-color: var(--accent);
+      background: rgba(91,141,238,0.06);
+    }
+
+    .invoer.correct {
+      border-color: var(--success);
+      background: rgba(76,187,138,0.1);
+      color: var(--success);
+    }
+
+    .invoer.fout {
+      border-color: var(--danger);
+      background: rgba(224,87,87,0.1);
+      color: var(--danger);
+    }
+
+    .invoer:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .toggle-stap {
+      background: rgba(91,141,238,0.12);
+      border: 1px solid rgba(91,141,238,0.25);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-stap:hover {
+      background: rgba(91,141,238,0.2);
+    }
+
+    /* ── KNOPPEN ── */
+    .knoppen-rij {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 22px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-primair {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primair:not(:disabled):hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .btn-succes {
+      background: var(--success);
+      color: #0c2e1c;
+    }
+
+    .btn-succes:not(:disabled):hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    /* ── FEEDBACK ── */
+    .feedback-box {
+      margin-top: 20px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      line-height: 1.65;
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .feedback-box.succes {
+      background: rgba(76,187,138,0.1);
+      border: 1px solid rgba(76,187,138,0.3);
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .feedback-box.fout-tijdelijk {
+      background: rgba(245,197,66,0.08);
+      border: 1px solid rgba(245,197,66,0.3);
+      color: var(--warning);
+    }
+
+    .feedback-box.fout-definitief {
+      background: rgba(224,87,87,0.09);
+      border: 1px solid rgba(224,87,87,0.3);
+      color: var(--danger);
+    }
+
+    /* ── REKENREGEL ── */
+    .rekenregel-blok {
+      margin-top: 16px;
+      background: var(--surface2);
+      border: 1px solid rgba(91,141,238,0.2);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .rekenregel-blok .rr-titel {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .rekenregel-blok ul {
+      padding-left: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .rekenregel-blok ul li {
+      display: flex;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .rekenregel-blok ul li::before {
+      content: '•';
+      color: var(--accent);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── EINDSCHERM ── */
+    .eindscherm {
+      text-align: center;
+      padding: 48px 24px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .eind-emoji { font-size: 3.5rem; margin-bottom: 16px; }
+
+    .eind-punten {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .eind-score-label {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .score-badge {
+      display: inline-block;
+      font-size: 2rem;
+      font-weight: 800;
+      padding: 10px 32px;
+      border-radius: 12px;
+      margin-bottom: 28px;
+    }
+
+    .score-badge.A { background: rgba(168,230,161,0.15); color: #a8e6a1; border: 2px solid rgba(168,230,161,0.4); }
+    .score-badge.B { background: rgba(255,244,163,0.12); color: #fff4a3; border: 2px solid rgba(255,244,163,0.35); }
+    .score-badge.C { background: rgba(255,203,164,0.12); color: #ffcba4; border: 2px solid rgba(255,203,164,0.35); }
+
+    .eind-bericht {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <a href="index.html" class="back-btn">← Terug naar oefeningen</a>
+    <div class="page-title">
+      <h1>🔢 Gehele getallen</h1>
+      <span id="user-label">Laden...</span>
+    </div>
+  </header>
+
+  <!-- Voortgangsbalk -->
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span id="progress-tekst">Oefening 1 van 10</span>
+      <span id="score-live">0 / 0 pt</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Inhoud -->
+  <div id="inhoud"></div>
+
+</div>
+
+<script type="module">
+import { db, OEFENINGEN } from './config.js';
+import { doc, getDoc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+// ── Constanten ──
+const TOTAAL = 10;
+const TYPE_NR = 1; // type nummer in config.js
+
+// ── State ──
+let user = null;
+let oefeningen = [];
+let huidigeIdx = 0;
+let punten = 0;
+let eerstePoging = 0;
+let tweedePoging = 0;
+let foutGegaan = 0;
+let pogingTeller = 0; // pogingen per huidige oefening (0 = nog geen, 1 = eerste fout, 2 = finale)
+
+// ── Login check ──
+function checkLogin() {
+  const stored = localStorage.getItem('wiskunde_user');
+  if (!stored) { window.location.href = 'login.html'; return null; }
+  try {
+    const u = JSON.parse(stored);
+    if (u.isAdmin) { window.location.href = 'dashboard.html'; return null; }
+    document.getElementById('user-label').textContent = u.naam || u.email;
+    return u;
+  } catch(e) {
+    localStorage.removeItem('wiskunde_user');
+    window.location.href = 'login.html';
+    return null;
+  }
+}
+
+// ── Oefeningen genereren ──
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function genereer() {
+  const lijst = [];
+  const set = new Set();
+  let t1 = 0, t2 = 0, t3 = 0;
+  const doel = Math.floor(TOTAAL / 3);
+
+  while (lijst.length < TOTAAL) {
+    let type;
+    if (t1 < doel && t2 < doel && t3 < doel) {
+      type = rand(1, 3);
+    } else if (t1 >= doel && t2 < doel && t3 < doel) {
+      type = Math.random() < 0.5 ? 2 : 3;
+    } else if (t2 >= doel && t1 < doel && t3 < doel) {
+      type = Math.random() < 0.5 ? 1 : 3;
+    } else if (t3 >= doel && t1 < doel && t2 < doel) {
+      type = Math.random() < 0.5 ? 1 : 2;
+    } else if (t1 >= doel && t2 >= doel) {
+      type = 3;
+    } else if (t1 >= doel && t3 >= doel) {
+      type = 2;
+    } else if (t2 >= doel && t3 >= doel) {
+      type = 1;
+    } else {
+      type = rand(1, 3);
+    }
+
+    if (type === 1) {
+      // Optellen/aftrekken met positief tweede getal
+      const eerstNeg = Math.random() < 0.5;
+      const a = eerstNeg ? -rand(5, 20) : rand(5, 20);
+      const b = rand(5, 20);
+      if (Math.abs(a) === b) continue;
+      const op = Math.random() < 0.5 ? '+' : '-';
+      if (op === '+' && a > 0) continue; // beide positief
+      if (op === '-' && a > 0 && a - b > 0) continue; // beide positief en positief resultaat
+      const res = op === '+' ? a + b : a - b;
+      const key = `${a}${op}${b}`;
+      if (set.has(key)) continue;
+      set.add(key); t1++;
+      lijst.push({ display: `${a} ${op} ${b}`, a, b, op, result: res, subType: 1, needsRewrite: false });
+    } else if (type === 2) {
+      // Optellen/aftrekken met negatief tweede getal
+      const eerstNeg = Math.random() < 0.5;
+      const a = eerstNeg ? -rand(5, 20) : rand(5, 20);
+      const b = -rand(5, 20);
+      if (Math.abs(a) === Math.abs(b)) continue;
+      const op = Math.random() < 0.5 ? '+' : '-';
+      const key = `${a}${op}${b}`;
+      if (set.has(key)) continue;
+      set.add(key); t2++;
+      const absB = Math.abs(b);
+      const herOp = op === '+' ? '-' : '+';
+      const res = herOp === '+' ? a + absB : a - absB;
+      const herschreven = `${a} ${herOp} ${absB}`;
+      lijst.push({
+        display: `${a} ${op} (${b})`, a, b: b, op, result: res,
+        subType: 2, needsRewrite: true,
+        rewrittenA: a, rewrittenB: absB, rewrittenOp: herOp,
+        herschreven
+      });
+    } else {
+      // Vermenigvuldigen of delen
+      const isMult = Math.random() < 0.5;
+      if (isMult) {
+        const absA = rand(1, 12), absB = rand(2, 12);
+        const sA = Math.random() < 0.5 ? -1 : 1;
+        const sB = Math.random() < 0.5 ? -1 : 1;
+        let a = sA * absA, b = sB * absB;
+        if (a > 0 && b > 0) continue;
+        if (Math.random() < 0.5) [a, b] = [b, a];
+        const res = a * b;
+        const key = `${a}*${b}`;
+        if (set.has(key)) continue;
+        set.add(key); t3++;
+        const negTelling = (a < 0 ? 1 : 0) + (b < 0 ? 1 : 0);
+        const bStr = b < 0 ? `(${b})` : `${b}`;
+        lijst.push({
+          display: `${a} · ${bStr}`, a, b, op: '·', result: res,
+          subType: 3, needsRewrite: false, isMult: true,
+          negTelling, absResult: Math.abs(res)
+        });
+      } else {
+        // Deling via terugwerken
+        const f1 = rand(2, 10), f2 = rand(2, 10);
+        const s1 = Math.random() < 0.5 ? -1 : 1;
+        const s2 = Math.random() < 0.5 ? -1 : 1;
+        const fa = s1 * f1, fb = s2 * f2;
+        if (fa > 0 && fb > 0) continue;
+        const deeltal = fa * fb;
+        const deler = Math.random() < 0.5 ? fa : fb;
+        const res = deeltal / deler;
+        const key = `${deeltal}/${deler}`;
+        if (set.has(key)) continue;
+        set.add(key); t3++;
+        const negTelling = (deeltal < 0 ? 1 : 0) + (deler < 0 ? 1 : 0);
+        const delerStr = deler < 0 ? `(${deler})` : `${deler}`;
+        lijst.push({
+          display: `${deeltal} : ${delerStr}`, a: deeltal, b: deler,
+          op: ':', result: res, subType: 3, needsRewrite: false, isMult: false,
+          negTelling, absResult: Math.abs(res)
+        });
+      }
+    }
+  }
+  return lijst;
+}
+
+// ── Voortgang updaten ──
+function updateVoortgang() {
+  const pct = (huidigeIdx / TOTAAL) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-tekst').textContent =
+    huidigeIdx < TOTAAL ? `Oefening ${huidigeIdx + 1} van ${TOTAAL}` : `Klaar!`;
+  document.getElementById('score-live').textContent = `${punten} / ${huidigeIdx} pt`;
+}
+
+// ── Rekenregel bepalen ──
+function bepaalRekenregel(oef) {
+  const { subType, op, needsRewrite } = oef;
+  if (subType === 1) {
+    return `<div class="rr-titel">REKENREGEL</div>
+      <ul>
+        <li>Gebruik een pijlenvoorstelling om het resultaat te berekenen.</li>
+        <li>Het toestandsteken van de uitkomst kun je afleiden uit de pijlenvoorstelling.</li>
+        <li>De absolute waarde van de uitkomst vind je door de absolute waardes van de getallen in de opgave op te tellen of af te trekken. Wat je moet doen, zie je in de pijlenvoorstelling.</li>
+      </ul>`;
+  } else if (subType === 2) {
+    const bewOud = op === '+' ? 'optelling' : 'aftrekking';
+    const bewNieuw = op === '+' ? 'aftrekking' : 'optelling';
+    const tegenOud = op === '+' ? 'optellen' : 'aftrekken';
+    const tegenNieuw = op === '+' ? 'aftrekken' : 'optellen';
+    return `<div class="rr-titel">REKENREGEL</div>
+      <ul>
+        <li>Een negatief getal ${tegenOud} is hetzelfde als zijn tegengestelde ${tegenNieuw}. Herschrijf dus de ${bewOud} eerst als een ${bewNieuw} met een positief getal.</li>
+        <li>Gebruik daarna een pijlenvoorstelling om verder uit te rekenen.</li>
+      </ul>`;
+  } else {
+    const bewNaam = oef.isMult ? 'vermenigvuldigen' : 'delen';
+    const absActie = oef.isMult ? 'te vermenigvuldigen' : 'te delen';
+    return `<div class="rr-titel">REKENREGEL</div>
+      <ul>
+        <li>Het toestandsteken van het resultaat vind je door het aantal negatieve getallen te tellen: bij een even aantal is de uitkomst positief, bij een oneven aantal is de uitkomst negatief.</li>
+        <li>De absolute waarde van het resultaat vind je door de absolute waardes van de getallen in de opgave ${absActie}.</li>
+      </ul>`;
+  }
+}
+
+// ── Oefening renderen ──
+function toonOefening() {
+  if (huidigeIdx >= TOTAAL) {
+    toonEindscherm();
+    return;
+  }
+
+  pogingTeller = 0;
+  updateVoortgang();
+  const oef = oefeningen[huidigeIdx];
+  const toonTussenstap = oef.needsRewrite;
+
+  const html = `
+    <div class="oefening-kaart" id="oef-kaart">
+      <p class="opmerking">Druk op <strong>+</strong> voor een extra tussenstap als dat nodig is.</p>
+      <p class="vraag-label">Bereken</p>
+      <p class="vraag-tekst" id="vraag-tekst">${oef.display} =</p>
+
+      <div class="stap-rij" id="stap1-rij">
+        <span class="equals">=</span>
+        <input class="invoer" id="invoer1" type="text" placeholder="?" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text">
+        <button class="toggle-stap" id="toggle-btn" title="Tussenstap tonen/verbergen">+</button>
+      </div>
+
+      <div class="stap-rij" id="stap2-rij" style="display:none">
+        <span class="equals">=</span>
+        <input class="invoer" id="invoer2" type="text" placeholder="?" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text">
+      </div>
+
+      <div class="knoppen-rij">
+        <button class="btn btn-primair" id="controleer-btn" disabled>Controleer</button>
+        <button class="btn btn-succes" id="volgende-btn" style="display:none">Volgende oefening →</button>
+      </div>
+
+      <div class="feedback-box" id="feedback-box"></div>
+      <div class="rekenregel-blok" id="rekenregel-blok"></div>
+    </div>
+  `;
+
+  document.getElementById('inhoud').innerHTML = html;
+
+  // Events
+  const invoer1 = document.getElementById('invoer1');
+  const invoer2 = document.getElementById('invoer2');
+  const toggleBtn = document.getElementById('toggle-btn');
+  const controleerBtn = document.getElementById('controleer-btn');
+  const volgendeBtn = document.getElementById('volgende-btn');
+  let stap2Zichtbaar = false;
+
+  function updateControleer() {
+    const h1 = invoer1.value.trim() !== '';
+    const h2 = invoer2.value.trim() !== '';
+    controleerBtn.disabled = !(h1 || h2);
+  }
+
+  invoer1.addEventListener('input', updateControleer);
+  invoer2.addEventListener('input', updateControleer);
+  invoer1.focus();
+
+  toggleBtn.addEventListener('click', () => {
+    stap2Zichtbaar = !stap2Zichtbaar;
+    document.getElementById('stap2-rij').style.display = stap2Zichtbaar ? 'flex' : 'none';
+    toggleBtn.textContent = stap2Zichtbaar ? '−' : '+';
+    if (!stap2Zichtbaar) invoer2.value = '';
+    updateControleer();
+  });
+
+  controleerBtn.addEventListener('click', () => {
+    controleer();
+  });
+
+  volgendeBtn.addEventListener('click', () => {
+    huidigeIdx++;
+    toonOefening();
+  });
+}
+
+// ── Controleer antwoord ──
+function controleer() {
+  const oef = oefeningen[huidigeIdx];
+  const invoer1 = document.getElementById('invoer1');
+  const invoer2 = document.getElementById('invoer2');
+  const fbBox = document.getElementById('feedback-box');
+  const rrBlok = document.getElementById('rekenregel-blok');
+  const controleerBtn = document.getElementById('controleer-btn');
+  const volgendeBtn = document.getElementById('volgende-btn');
+
+  let v1 = invoer1.value.trim();
+  let v2 = invoer2.value.trim();
+
+  // Swap: als veld 1 leeg en veld 2 ingevuld
+  if (v1 === '' && v2 !== '') {
+    v1 = v2; v2 = '';
+    invoer1.value = v1; invoer2.value = '';
+  }
+
+  const heeft2 = v1 !== '' && v2 !== '';
+  const antwoord = v2 !== '' ? v2 : v1;
+
+  // Verberg toggle & extra stap na eerste controle
+  document.getElementById('toggle-btn').style.display = 'none';
+  document.getElementById('stap2-rij').style.display = v2 !== '' ? 'flex' : 'none';
+
+  const userNum = parseFloat(antwoord.replace(',', '.'));
+  const correct = Number.isFinite(userNum) && userNum === oef.result;
+
+  // Tussenstap controle voor type 2
+  let tussenstapFout = false;
+  if (oef.needsRewrite && heeft2) {
+    const v1Norm = v1.replace(/\s/g,'');
+    const verwacht = oef.herschreven.replace(/\s/g,'');
+    tussenstapFout = (v1Norm !== verwacht);
+  }
+
+  // ── GOED (eerste poging) ──
+  if (correct && pogingTeller === 0 && !tussenstapFout) {
+    invoer1.classList.add('correct');
+    if (v2 !== '') invoer2.classList.add('correct');
+    punten += 1;
+    eerstePoging++;
+    fbBox.className = 'feedback-box succes';
+    fbBox.innerHTML = '✅ Correct! Goed gedaan!';
+    fbBox.style.display = 'block';
+    controleerBtn.style.display = 'none';
+    volgendeBtn.style.display = 'inline-block';
+    invoer1.disabled = true; invoer2.disabled = true;
+    updateVoortgang();
+    return;
+  }
+
+  // ── GOED (tweede poging) ──
+  if (correct && pogingTeller === 1 && !tussenstapFout) {
+    invoer1.classList.add('correct');
+    if (v2 !== '') invoer2.classList.add('correct');
+    punten += 0.5;
+    tweedePoging++;
+    fbBox.className = 'feedback-box succes';
+    fbBox.innerHTML = '✅ Correct bij de tweede poging!';
+    fbBox.style.display = 'block';
+    rrBlok.style.display = 'none';
+    controleerBtn.style.display = 'none';
+    volgendeBtn.style.display = 'inline-block';
+    invoer1.disabled = true; invoer2.disabled = true;
+    updateVoortgang();
+    return;
+  }
+
+  // ── FOUT ──
+  if (pogingTeller === 0) {
+    // Eerste fout: toon rekenregel, laat opnieuw proberen
+    invoer1.classList.add('fout');
+    if (v2 !== '') invoer2.classList.add('fout');
+
+    fbBox.className = 'feedback-box fout-tijdelijk';
+    fbBox.innerHTML = 'Je antwoord is niet juist. Bekijk de rekenregel en probeer opnieuw.';
+    fbBox.style.display = 'block';
+
+    rrBlok.innerHTML = bepaalRekenregel(oef);
+    rrBlok.style.display = 'block';
+
+    // Reset invoervelden voor nieuwe poging
+    setTimeout(() => {
+      invoer1.classList.remove('fout');
+      invoer2.classList.remove('fout');
+      invoer1.value = '';
+      invoer2.value = '';
+      invoer1.disabled = false;
+      invoer2.disabled = false;
+    }, 800);
+
+    pogingTeller = 1;
+    controleerBtn.disabled = true;
+
+  } else {
+    // Tweede fout: definitief fout, toon correct antwoord
+    invoer1.classList.add('fout');
+    if (v2 !== '') invoer2.classList.add('fout');
+    foutGegaan++;
+    fbBox.className = 'feedback-box fout-definitief';
+    fbBox.innerHTML = `❌ Het juiste antwoord is <strong>${oef.result}</strong>.`;
+    fbBox.style.display = 'block';
+    rrBlok.style.display = 'block';
+    controleerBtn.style.display = 'none';
+    volgendeBtn.style.display = 'inline-block';
+    invoer1.disabled = true; invoer2.disabled = true;
+    updateVoortgang();
+  }
+}
+
+// ── Eindscherm ──
+function toonEindscherm() {
+  updateVoortgang();
+
+  let algScore, emoji, bericht;
+  if (punten >= 8.5) {
+    algScore = 'A';
+    emoji = '🌟';
+    bericht = 'Uitstekend! Je beheerst de bewerkingen met gehele getallen heel goed.';
+  } else if (punten >= 7) {
+    algScore = 'B';
+    emoji = '😊';
+    bericht = 'Goed gedaan! Je bent al ver gevorderd. Blijf oefenen!';
+  } else {
+    algScore = 'C';
+    emoji = '📚';
+    bericht = 'Oefen nog wat verder. Je kan dit zeker verbeteren!';
+  }
+
+  document.getElementById('inhoud').innerHTML = `
+    <div class="eindscherm">
+      <div class="eind-emoji">${emoji}</div>
+      <div class="eind-punten">${punten}/10</div>
+      <div class="eind-score-label">Je haalde ${punten}/10</div>
+      <div class="score-badge ${algScore}">Score: ${algScore}</div>
+      <div class="eind-bericht">${bericht}</div>
+      <button class="btn btn-primair" id="terug-btn">← Terug naar oefeningen</button>
+    </div>
+  `;
+
+  document.getElementById('terug-btn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+
+  // Opslaan in Firebase
+  slaanOp(algScore);
+}
+
+// ── Firebase opslaan ──
+async function slaanOp(algScore) {
+  try {
+    const docRef = doc(db, 'leerlingen', user.email);
+    const nu = new Date().toISOString();
+    await updateDoc(docRef, {
+      resultaten: arrayUnion({
+        type: TYPE_NR,
+        datum: nu,
+        score: algScore,
+        totaal: punten,
+        eerste: eerstePoging,
+        tweede: tweedePoging,
+        fout: foutGegaan
+      })
+    });
+  } catch(err) {
+    console.error('Fout bij opslaan:', err);
+  }
+}
+
+// ── Init ──
+user = checkLogin();
+if (user) {
+  oefeningen = genereer();
+  toonOefening();
+}
+</script>
+
+</body>
+</html>
