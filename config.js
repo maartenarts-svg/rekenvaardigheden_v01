@@ -5,12 +5,12 @@
 // ── FIREBASE CONFIGURATIE ──
 // Plak hier je Firebase config (zie FIREBASE_SETUP.md stap 4)
 const firebaseConfig = {
-  apiKey: "VERVANG_DOOR_JOUW_API_KEY",
-  authDomain: "VERVANG.firebaseapp.com",
-  projectId: "VERVANG",
-  storageBucket: "VERVANG.appspot.com",
-  messagingSenderId: "VERVANG",
-  appId: "VERVANG"
+  apiKey: "AIzaSyBx8DsPTO-Jk4xg_-9Qno6hzmfZwbgy0YE",
+  authDomain: "rekenvaardigheden-v01.firebaseapp.com",
+  projectId: "rekenvaardigheden-v01",
+  storageBucket: "rekenvaardigheden-v01.firebasestorage.app",
+  messagingSenderId: "628547232535",
+  appId: "1:628547232535:web:8b1725cee146410b538d52"
 };
 
 // ── ADMIN INSTELLINGEN ──
