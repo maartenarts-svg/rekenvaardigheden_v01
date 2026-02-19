@@ -8,448 +8,151 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --surface2: #20243a;
-      --border: rgba(255,255,255,0.08);
-      --text: #e8eaf0;
-      --muted: #8891aa;
-      --accent: #5b8dee;
-      --success: #4cbb8a;
-      --danger: #e05757;
-      --warning: #f5c542;
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #20243a;
+      --border: rgba(255,255,255,0.08); --text: #e8eaf0; --muted: #8891aa;
+      --accent: #5b8dee; --success: #4cbb8a; --danger: #e05757; --warning: #f5c542;
       --radius: 14px;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Outfit', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(91,141,238,0.10) 0%, transparent 70%),
-        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(76,187,138,0.07) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
+      content: ''; position: fixed; inset: 0;
+      background: radial-gradient(ellipse 60% 40% at 20% 10%, rgba(91,141,238,.10) 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 50% at 80% 80%, rgba(76,187,138,.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
     }
+    .wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 32px 20px 60px; }
 
-    .wrap {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 32px 20px 60px;
-    }
-
-    /* ── HEADER ── */
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 32px;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.88rem;
-      font-weight: 600;
-      padding: 8px 14px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      transition: all 0.2s;
-    }
-    .back-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 12px; flex-wrap: wrap; }
+    .back-btn { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); text-decoration: none; font-size: .88rem; font-weight: 600; padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; transition: all .2s; }
+    .back-btn:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
     .page-title h1 { font-size: 1.3rem; font-weight: 800; }
-    .page-title span { font-size: 0.78rem; color: var(--muted); }
+    .page-title span { font-size: .78rem; color: var(--muted); }
 
-    /* ── VOORTGANGSBALK ── */
     .progress-wrap { margin-bottom: 28px; }
-    .progress-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-    .progress-track {
-      height: 8px;
-      background: var(--surface);
-      border-radius: 99px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), #a0c4ff);
-      border-radius: 99px;
-      transition: width 0.5s cubic-bezier(.4,0,.2,1);
-      width: 0%;
-    }
+    .progress-meta { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+    .progress-track { height: 8px; background: var(--surface); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #a0c4ff); border-radius: 99px; transition: width .5s cubic-bezier(.4,0,.2,1); width: 0%; }
 
-    /* ── OEFENING KAART ── */
-    .oefening-kaart {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 32px;
-      animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    .oefening-kaart { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .vraag-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-bottom: 20px; display: block; }
 
-    .vraag-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: var(--muted);
-      margin-bottom: 20px;
+    /* ── OPGAVE: twee kolommen met verticale streep ── */
+    .opgave-grid {
+      display: grid; grid-template-columns: 1fr 2px 1fr;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; margin-bottom: 32px; min-height: 100px;
     }
-
-    /* ── OPGAVE DISPLAY ── */
-    .opgave-rij {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 40px;
-      margin-bottom: 36px;
-      padding: 24px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      flex-wrap: wrap;
-    }
-
-    .opgave-breuk-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .opgave-en {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--muted);
-      user-select: none;
-    }
+    .opgave-cel { display: flex; align-items: center; justify-content: center; padding: 20px 32px; }
+    .opgave-div { background: rgba(255,255,255,.1); }
 
     /* Breuk weergave */
-    .breuk-display {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 1.8rem;
-      font-weight: 800;
-      line-height: 1;
-    }
-    .breuk-display .b-teller { padding: 4px 12px; color: var(--text); }
-    .breuk-display .b-streep {
-      width: 100%;
-      min-width: 40px;
-      height: 3px;
-      background: var(--text);
-      border-radius: 2px;
-      margin: 4px 0;
-    }
-    .breuk-display .b-noemer { padding: 4px 12px; color: var(--text); }
+    .breuk-disp { display: inline-flex; flex-direction: column; align-items: center; font-size: 1.9rem; font-weight: 800; line-height: 1; }
+    .breuk-disp .bt { padding: 4px 10px; }
+    .breuk-disp .bs { width: 100%; min-width: 36px; height: 3px; background: var(--text); border-radius: 2px; margin: 5px 0; }
+    .breuk-disp .bn { padding: 4px 10px; }
+    .breuk-disp .neg { color: var(--warning); }
 
-    /* ── INVOER SECTIE ── */
-    .invoer-sectie {
-      display: flex;
-      gap: 40px;
-      align-items: flex-start;
-      justify-content: center;
-      flex-wrap: wrap;
+    /* ── INVOER SECTIE: twee kolommen met verticale streep ── */
+    .invoer-grid {
+      display: grid; grid-template-columns: 1fr 2px 1fr;
+      margin-bottom: 4px;
     }
+    .invoer-div { background: var(--border); }
+    .breuk-kolom { display: flex; flex-direction: column; padding: 4px 16px; gap: 0; }
 
-    .breuk-kolom {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-      min-width: 180px;
-    }
+    /* Stap-rij: = [wrap] [+] */
+    .stap-rij { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .stap-eq { font-size: 1.3rem; font-weight: 700; color: var(--muted); width: 22px; text-align: center; flex-shrink: 0; }
 
-    /* Één stap-rij */
-    .stap-blok {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
+    /* Invoer-wrap */
+    .iv-wrap {
+      flex: 1; min-height: 70px; min-width: 110px;
+      background: var(--surface2); border: 2px solid var(--border); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: text; transition: border-color .2s, background .2s; position: relative; padding: 6px 12px;
     }
+    .iv-wrap.actief { border-color: var(--accent); background: rgba(91,141,238,.06); }
+    .iv-wrap.correct { border-color: var(--success) !important; background: rgba(76,187,138,.08) !important; }
+    .iv-wrap.fout    { border-color: var(--danger)  !important; background: rgba(224,87,87,.08) !important; }
+    .iv-wrap.disabled { opacity: .65; cursor: not-allowed; pointer-events: none; }
 
-    .stap-equals {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--muted);
-      margin: 8px 0 4px;
-      align-self: flex-start;
-      padding-left: 4px;
+    /* Buffer-span (teller die getypt wordt) */
+    .iv-buf {
+      font-size: 1.25rem; font-weight: 800; color: var(--text);
+      min-width: 24px; text-align: center;
+      display: inline-flex; align-items: center; justify-content: center;
     }
+    /* Knipperend cursor icoon */
+    .iv-buf::after { content: '|'; color: var(--accent); animation: blink 1s step-end infinite; margin-left: 1px; font-weight: 300; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-    /* ── BREUK INVOERVELD ── */
-    .breuk-invoer-wrap {
-      position: relative;
-      background: var(--surface2);
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 16px;
-      min-width: 120px;
-      min-height: 72px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: text;
-      transition: border-color 0.2s, background 0.2s;
-      width: 100%;
+    /* Breuk-invoer (na /) */
+    .iv-frac { display: inline-flex; flex-direction: column; align-items: center; }
+    .iv-frac .iv-teller { font-size: 1.25rem; font-weight: 800; color: var(--text); text-align: center; padding: 2px 4px; }
+    .iv-frac .iv-streep { width: 80%; min-width: 44px; height: 2px; background: var(--muted); border-radius: 2px; margin: 3px 0; }
+    .iv-frac input {
+      background: transparent; border: none; outline: none;
+      font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--text);
+      text-align: center; width: 70px; padding: 2px 4px; caret-color: var(--accent);
     }
+    .iv-frac input::placeholder { color: transparent; }
 
-    .breuk-invoer-wrap.actief {
-      border-color: var(--accent);
-      background: rgba(91,141,238,0.06);
+    /* + knop */
+    .plus-btn {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 2px solid rgba(91,141,238,.3); background: rgba(91,141,238,.1);
+      color: var(--accent); font-size: 1.1rem; font-weight: 700;
+      cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s; font-family: 'Outfit', sans-serif;
     }
+    .plus-btn:hover:not(:disabled) { background: rgba(91,141,238,.22); border-color: var(--accent); }
+    .plus-btn:disabled { opacity: .3; cursor: not-allowed; }
 
-    .breuk-invoer-wrap.correct {
-      border-color: var(--success);
-      background: rgba(76,187,138,0.08);
-    }
-
-    .breuk-invoer-wrap.fout {
-      border-color: var(--danger);
-      background: rgba(224,87,87,0.08);
-    }
-
-    .breuk-invoer-wrap.disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-
-    /* De invoer bestaat uit teller-input / streep / noemer-input */
-    .breuk-invoer-inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      width: 100%;
-    }
-
-    .breuk-invoer-inner input {
-      background: transparent;
-      border: none;
-      outline: none;
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: var(--text);
-      text-align: center;
-      width: 80px;
-      padding: 2px 4px;
-      /* caret altijd zichtbaar */
-      caret-color: var(--accent);
-    }
-
-    .breuk-invoer-inner input::placeholder {
-      color: transparent;
-    }
-
-    .breuk-invoer-inner .in-streep {
-      width: 70%;
-      min-width: 50px;
-      height: 2px;
-      background: var(--muted);
-      border-radius: 2px;
-      margin: 2px 0;
-    }
-
-    /* + knop onder elke kolom */
-    .stap-toevoeg-btn {
-      margin-top: 8px;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 2px solid rgba(91,141,238,0.3);
-      background: rgba(91,141,238,0.1);
-      color: var(--accent);
-      font-size: 1.2rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      font-family: 'Outfit', sans-serif;
-      flex-shrink: 0;
-    }
-    .stap-toevoeg-btn:hover { background: rgba(91,141,238,0.22); border-color: var(--accent); }
-    .stap-toevoeg-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    /* ── KNOPPEN ── */
-    .knoppen-rij {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 28px;
-    }
-    .btn {
-      padding: 12px 22px;
-      border: none;
-      border-radius: 10px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.92rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .knoppen-rij { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+    .btn { padding: 12px 22px; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: .92rem; font-weight: 700; cursor: pointer; transition: all .2s; }
+    .btn:disabled { opacity: .35; cursor: not-allowed; }
     .btn-primair { background: var(--accent); color: white; }
-    .btn-primair:not(:disabled):hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-primair:not(:disabled):hover { opacity: .85; transform: translateY(-1px); }
     .btn-succes { background: var(--success); color: #0c2e1c; }
-    .btn-succes:not(:disabled):hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-succes:not(:disabled):hover { opacity: .85; transform: translateY(-1px); }
 
-    /* ── FEEDBACK ── */
-    .feedback-box {
-      margin-top: 20px;
-      padding: 16px 20px;
-      border-radius: 10px;
-      font-size: 0.92rem;
-      line-height: 1.7;
-      display: none;
-      animation: fadeIn 0.25s ease;
-    }
-    .feedback-box.succes {
-      background: rgba(76,187,138,0.1);
-      border: 1px solid rgba(76,187,138,0.3);
-      color: var(--success);
-      font-weight: 600;
-    }
-    .feedback-box.fout-tijdelijk {
-      background: rgba(245,197,66,0.08);
-      border: 1px solid rgba(245,197,66,0.3);
-      color: var(--warning);
-    }
-    .feedback-box.fout-definitief {
-      background: rgba(224,87,87,0.09);
-      border: 1px solid rgba(224,87,87,0.3);
-      color: var(--danger);
-    }
+    .feedback-box { margin-top: 20px; padding: 16px 20px; border-radius: 10px; font-size: .92rem; line-height: 1.7; display: none; animation: fadeIn .25s ease; }
+    .feedback-box.succes { background: rgba(76,187,138,.1); border: 1px solid rgba(76,187,138,.3); color: var(--success); font-weight: 600; }
+    .feedback-box.geel { background: rgba(245,197,66,.08); border: 1px solid rgba(245,197,66,.3); color: var(--warning); }
+    .feedback-box.rood { background: rgba(224,87,87,.09); border: 1px solid rgba(224,87,87,.3); color: var(--danger); }
 
-    /* ── REKENREGEL ── */
-    .rekenregel-blok {
-      margin-top: 16px;
-      background: var(--surface2);
-      border: 1px solid rgba(91,141,238,0.2);
-      border-radius: 10px;
-      padding: 16px 20px;
-      display: none;
-      animation: fadeIn 0.25s ease;
-    }
-    .rekenregel-blok .rr-titel {
-      font-size: 0.7rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--accent);
-      margin-bottom: 10px;
-    }
-    .rekenregel-blok ul {
-      padding-left: 0;
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .rekenregel-blok ul li {
-      display: flex;
-      gap: 10px;
-      font-size: 0.88rem;
-      color: var(--text);
-      line-height: 1.55;
-    }
-    .rekenregel-blok ul li::before {
-      content: '•';
-      color: var(--accent);
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
-    .rekenregel-blok .rr-opgelet {
-      margin-top: 10px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--warning);
-    }
+    .rekenregel-blok { margin-top: 16px; background: var(--surface2); border: 1px solid rgba(91,141,238,.2); border-radius: 10px; padding: 16px 20px; display: none; animation: fadeIn .25s ease; }
+    .rekenregel-blok .rr-titel { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 10px; }
+    .rekenregel-blok ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .rekenregel-blok ul li { display: flex; gap: 10px; font-size: .88rem; color: var(--text); line-height: 1.55; }
+    .rekenregel-blok ul li::before { content: '•'; color: var(--accent); font-size: 1.1rem; flex-shrink: 0; }
+    .rr-opgelet { margin-top: 10px; font-size: .88rem; font-weight: 700; color: var(--warning); }
 
-    /* ── EINDSCHERM ── */
-    .eindscherm {
-      text-align: center;
-      padding: 48px 24px;
-      animation: fadeIn 0.4s ease;
-    }
+    .eindscherm { text-align: center; padding: 48px 24px; animation: fadeIn .4s ease; }
     .eind-emoji { font-size: 3.5rem; margin-bottom: 16px; }
     .eind-punten { font-size: 3rem; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
     .eind-score-label { font-size: 1rem; color: var(--muted); margin-bottom: 16px; }
-    .score-badge {
-      display: inline-block;
-      font-size: 2rem;
-      font-weight: 800;
-      padding: 10px 32px;
-      border-radius: 12px;
-      margin-bottom: 28px;
-    }
-    .score-badge.A { background: rgba(168,230,161,0.15); color: #a8e6a1; border: 2px solid rgba(168,230,161,0.4); }
-    .score-badge.B { background: rgba(255,244,163,0.12); color: #fff4a3; border: 2px solid rgba(255,244,163,0.35); }
-    .score-badge.C { background: rgba(255,203,164,0.12); color: #ffcba4; border: 2px solid rgba(255,203,164,0.35); }
+    .score-badge { display: inline-block; font-size: 2rem; font-weight: 800; padding: 10px 32px; border-radius: 12px; margin-bottom: 28px; }
+    .score-badge.A { background: rgba(168,230,161,.15); color: #a8e6a1; border: 2px solid rgba(168,230,161,.4); }
+    .score-badge.B { background: rgba(255,244,163,.12); color: #fff4a3; border: 2px solid rgba(255,244,163,.35); }
+    .score-badge.C { background: rgba(255,203,164,.12); color: #ffcba4; border: 2px solid rgba(255,203,164,.35); }
     .eind-bericht { font-size: 1rem; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
 
-    /* breuk inline in feedback */
-    .b-inline {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      vertical-align: middle;
-      font-size: 0.9em;
-      font-weight: 800;
-      line-height: 1;
-      margin: 0 4px;
-    }
-    .b-inline .bi-streep {
-      width: 100%;
-      min-width: 20px;
-      height: 2px;
-      background: currentColor;
-      margin: 1px 0;
-    }
+    .b-inline { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; font-size: .9em; font-weight: 800; line-height: 1; margin: 0 4px; }
+    .b-inline .bi-streep { width: 100%; min-width: 20px; height: 2px; background: currentColor; margin: 1px 0; }
 
     @media (max-width: 600px) {
-      .invoer-sectie { gap: 20px; }
-      .opgave-rij { gap: 20px; }
+      .opgave-grid { grid-template-columns: 1fr; }
+      .invoer-grid  { grid-template-columns: 1fr; }
+      .opgave-div, .invoer-div { height: 2px; width: auto; }
     }
   </style>
 </head>
 <body>
-
 <div class="wrap">
-
   <header>
     <a href="index.html" class="back-btn">← Terug naar oefeningen</a>
     <div class="page-title">
@@ -463,783 +166,560 @@
       <span id="progress-tekst">Oefening 1 van 6</span>
       <span id="score-live">0 / 0</span>
     </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-fill"></div>
-    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
   </div>
 
   <div id="inhoud"></div>
-
 </div>
 
 <script type="module">
-import { db, OEFENINGEN } from './config.js';
+import { db } from './config.js';
 import { doc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-// ── Constanten ──
 const TOTAAL = 6;
-const TYPE_NR = 2; // pas aan naar het juiste type-nummer in config.js
+const TYPE_NR = 2;
 
-// ── State ──
-let user = null;
-let opgaven = [];      // array van opgave-objecten
-let huidigeIdx = 0;
-let punten = 0;
-let eerstePoging = 0;
-let tweedePoging = 0;
-let foutGegaan = 0;
-let pogingTeller = 0;
+let user = null, opgaven = [], huidigeIdx = 0;
+let punten = 0, eerstePoging = 0, tweedePoging = 0, foutGegaan = 0, pogingTeller = 0;
+let stappenB1 = [], stappenB2 = [];
 
-// Per opgave: stappen-state per kolom
-let stappenB1 = []; // elke stap: { teller: number|null, noemer: number|null, wrap: el, tIn: el, nIn: el }
-let stappenB2 = [];
-let actieveKolom = null; // 'b1' of 'b2'
-let actieveStapIdx = { b1: 0, b2: 0 };
+// Globaal actief veld (voor keyboard-input)
+// { kolomId, stapIdx, obj }  (obj = stap-object)
+let actief = null;
 
-// ── Hulpfuncties ──
-function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while(b){ let t=b; b=a%b; a=t; } return a; }
-function lcm(a, b) { return Math.abs(a*b) / gcd(a,b); }
+/* ─── Wiskunde helpers ─────────────────────────────────── */
+const gcd = (a,b) => { a=Math.abs(a); b=Math.abs(b); while(b){let t=b;b=a%b;a=t;} return a; };
+const lcm = (a,b) => Math.abs(a*b)/gcd(a,b);
+const kgv = lcm;
+const breukGelijk = (t1,n1,t2,n2) => t1*n2 === t2*n1;
+const rand = (lo,hi) => Math.floor(Math.random()*(hi-lo+1))+lo;
+const pick  = arr => arr[Math.floor(Math.random()*arr.length)];
 
-function breukGelijk(t1,n1,t2,n2) {
-  // t1/n1 == t2/n2 ?
-  return t1 * n2 === t2 * n1;
-}
-
-function kgv(a, b) { return lcm(a, b); }
-
-// ── Login check ──
+/* ─── Login ────────────────────────────────────────────── */
 function checkLogin() {
-  const stored = localStorage.getItem('wiskunde_user');
-  if (!stored) { window.location.href = 'login.html'; return null; }
+  const s = localStorage.getItem('wiskunde_user');
+  if(!s){ window.location.href='login.html'; return null; }
   try {
-    const u = JSON.parse(stored);
-    if (u.isAdmin) { window.location.href = 'dashboard.html'; return null; }
-    document.getElementById('user-label').textContent = u.naam || u.email;
+    const u = JSON.parse(s);
+    if(u.isAdmin){ window.location.href='dashboard.html'; return null; }
+    document.getElementById('user-label').textContent = u.naam||u.email;
     return u;
-  } catch(e) {
-    localStorage.removeItem('wiskunde_user');
-    window.location.href = 'login.html';
-    return null;
-  }
+  } catch(e){ localStorage.removeItem('wiskunde_user'); window.location.href='login.html'; return null; }
 }
 
-// ── Breuk genereren ──
+/* ─── Breuk genereren ──────────────────────────────────── */
 const NOEMERS = [2,3,4,5,6,7,8,9,10,15,20];
 
-function randKeuze(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-function rand(min,max) { return Math.floor(Math.random()*(max-min+1))+min; }
+function irreducibel(neg=false) {
+  let t,n;
+  do { n=pick(NOEMERS); t=rand(1,n-1); } while(gcd(t,n)!==1);
+  if(neg && Math.random()<.5) t=-t;
+  return {t,n};
+}
 
-function maakIrreducibeleBreuk(kanNegatief = false) {
-  let t, n;
+function vereenvoudigbaar(neg=false) {
+  let t,n,att=0;
   do {
-    n = randKeuze(NOEMERS);
-    t = rand(1, n-1);
-  } while (gcd(t,n) !== 1);
-  if (kanNegatief && Math.random() < 0.5) t = -t;
-  return {t, n};
+    if(++att>200) return irreducibel(neg);
+    const b=irreducibel();
+    const fs=[2,3,4,5].filter(f=>NOEMERS.includes(b.n*f)&&b.t*f<b.n*f);
+    if(!fs.length) continue;
+    const f=pick(fs); t=b.t*f; n=b.n*f;
+  } while(gcd(t,n)===1||!NOEMERS.includes(n));
+  if(neg && Math.random()<.5) t=-t;
+  return {t,n};
 }
 
-function maakVereenvoudigbareBreuk(kanNegatief = false) {
-  // Kies een breuk die niet gereduceerd is: factor * irreducibele breuk
-  let t, n, factor;
-  let attempts = 0;
-  do {
-    attempts++;
-    if (attempts > 200) { return maakIrreducibeleBreuk(kanNegatief); }
-    const base = maakIrreducibeleBreuk(false);
-    // factor zodanig dat n*factor in NOEMERS zit
-    const mogelijkeFactoren = [2,3,4,5].filter(f => NOEMERS.includes(base.n * f) && base.t * f < base.n * f);
-    if (mogelijkeFactoren.length === 0) continue;
-    factor = randKeuze(mogelijkeFactoren);
-    t = base.t * factor;
-    n = base.n * factor;
-  } while (gcd(t,n) === 1 || !NOEMERS.includes(n));
-  if (kanNegatief && Math.random() < 0.5) t = -t;
-  return {t, n};
-}
-
-function controleerMaxGrootte(b1, b2) {
-  const l = kgv(b1.n, b2.n);
-  const nieuwT1 = b1.t * (l / b1.n);
-  const nieuwT2 = b2.t * (l / b2.n);
-  return Math.abs(nieuwT1) <= 100 && Math.abs(nieuwT2) <= 100 && l <= 100;
-}
-
-function genereerBreukpaar(b1Gen, b2Gen, maxPoging=200) {
-  for (let i=0; i<maxPoging; i++) {
-    const b1 = b1Gen();
-    const b2 = b2Gen();
-    if (b1.n === b2.n) continue; // al gelijknamig, oninteressant
-    if (controleerMaxGrootte(b1, b2)) return {b1, b2};
+function paar(g1,g2,max=300) {
+  for(let i=0;i<max;i++){
+    const b1=g1(),b2=g2();
+    if(b1.n===b2.n) continue;
+    const l=kgv(b1.n,b2.n);
+    if(Math.abs(b1.t*(l/b1.n))<=100&&Math.abs(b2.t*(l/b2.n))<=100&&l<=100) return {b1,b2};
   }
-  // fallback
-  return { b1: {t:1,n:2}, b2: {t:1,n:3} };
+  return {b1:{t:1,n:2},b2:{t:1,n:3}};
 }
 
-// ── Opgaven genereren ──
 function genereerOpgaven() {
-  const lijst = [];
-
-  // Opgave 1: twee positieve irreducibele breuken
-  lijst.push({ ...genereerBreukpaar(
-    () => maakIrreducibeleBreuk(false),
-    () => maakIrreducibeleBreuk(false)
-  ), type: 1 });
-
-  // Opgave 2: twee positieve irreducibele breuken
-  lijst.push({ ...genereerBreukpaar(
-    () => maakIrreducibeleBreuk(false),
-    () => maakIrreducibeleBreuk(false)
-  ), type: 2 });
-
-  // Opgave 3: minstens één negatieve breuk
-  const negIdx3 = Math.random() < 0.5 ? 'b1' : 'b2';
-  lijst.push({ ...genereerBreukpaar(
-    () => maakIrreducibeleBreuk(negIdx3 === 'b1'),
-    () => maakIrreducibeleBreuk(negIdx3 === 'b2')
-  ), type: 3, heeftNegatief: true });
-
-  // Opgave 4: minstens één vereenvoudigbare breuk
-  const simpIdx4 = Math.random() < 0.5 ? 'b1' : 'b2';
-  lijst.push({ ...genereerBreukpaar(
-    () => simpIdx4 === 'b1' ? maakVereenvoudigbareBreuk(false) : maakIrreducibeleBreuk(false),
-    () => simpIdx4 === 'b2' ? maakVereenvoudigbareBreuk(false) : maakIrreducibeleBreuk(false)
-  ), type: 4, heeftVereenvoudigbaar: true });
-
-  // Opgave 5: minstens één negatieve én minstens één vereenvoudigbare breuk
-  // Gebruik twee slots: b1 = vereenvoudigbaar (negatief), b2 = irreducibel (positief) of andersom
-  lijst.push({ ...genereerBreukpaar(
-    () => maakVereenvoudigbareBreuk(true),
-    () => maakIrreducibeleBreuk(false)
-  ), type: 5, heeftNegatief: true, heeftVereenvoudigbaar: true });
-
-  // Opgave 6: één breuk + één positief geheel getal < 11
-  // Stel het getal voor als t/1, dan is de noemer van b2 = 1
-  let b1_6, getalWaarde;
-  for (let i=0; i<200; i++) {
-    b1_6 = maakIrreducibeleBreuk(false);
-    getalWaarde = rand(2, 10);
-    const l = kgv(b1_6.n, 1);
-    const nieuwT1 = b1_6.t * (l / b1_6.n);
-    const nieuwT2 = getalWaarde * l;
-    if (Math.abs(nieuwT1) <= 100 && Math.abs(nieuwT2) <= 100 && l <= 100) break;
+  const L=[];
+  L.push({...paar(()=>irreducibel(),()=>irreducibel()),nr:1});
+  L.push({...paar(()=>irreducibel(),()=>irreducibel()),nr:2});
+  const neg3=Math.random()<.5;
+  L.push({...paar(()=>irreducibel(neg3),()=>irreducibel(!neg3)),nr:3});
+  const s4=Math.random()<.5;
+  L.push({...paar(()=>s4?vereenvoudigbaar():irreducibel(),()=>s4?irreducibel():vereenvoudigbaar()),nr:4});
+  L.push({...paar(()=>vereenvoudigbaar(true),()=>irreducibel()),nr:5});
+  let b1_6,g;
+  for(let i=0;i<300;i++){
+    b1_6=irreducibel(); g=rand(2,10);
+    const l=kgv(b1_6.n,1);
+    if(Math.abs(b1_6.t*(l/b1_6.n))<=100&&Math.abs(g*l)<=100&&l<=100) break;
   }
-  lijst.push({
-    b1: b1_6,
-    b2: { t: getalWaarde, n: 1 }, // n=1 = geheel getal
-    type: 6,
-    isGeheelGetal: true,
-    getalWaarde
-  });
-
-  return lijst;
+  L.push({b1:b1_6,b2:{t:g,n:1},nr:6,isGeheel:true});
+  return L;
 }
 
-// ── Voortgang ──
+/* ─── Voortgang ────────────────────────────────────────── */
 function updateVoortgang() {
-  const pct = (huidigeIdx / TOTAAL) * 100;
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-tekst').textContent =
-    huidigeIdx < TOTAAL ? `Oefening ${huidigeIdx + 1} van ${TOTAAL}` : 'Klaar!';
-  document.getElementById('score-live').textContent = `${punten} / ${huidigeIdx}`;
+  document.getElementById('progress-fill').style.width=(huidigeIdx/TOTAAL*100)+'%';
+  document.getElementById('progress-tekst').textContent=huidigeIdx<TOTAAL?`Oefening ${huidigeIdx+1} van ${TOTAAL}`:'Klaar!';
+  document.getElementById('score-live').textContent=`${punten} / ${huidigeIdx}`;
 }
 
-// ── Breuk als HTML weergeven ──
-function breukHTML(t, n, grootteKlasse = '') {
-  const tStr = t < 0 ? `<span style="color:var(--warning)">${t}</span>` : `${t}`;
-  if (n === 1) {
-    // Geheel getal weergeven als breuk
-    return `<div class="breuk-display ${grootteKlasse}">
-      <div class="b-teller">${t}</div>
-      <div class="b-streep"></div>
-      <div class="b-noemer">1</div>
-    </div>`;
-  }
-  return `<div class="breuk-display ${grootteKlasse}">
-    <div class="b-teller">${tStr}</div>
-    <div class="b-streep"></div>
-    <div class="b-noemer">${n}</div>
-  </div>`;
+/* ─── HTML helpers ─────────────────────────────────────── */
+function breukDisp(t,n) {
+  const ts = t<0?`<span class="neg">${t}</span>`:`${t}`;
+  if(n===1) return `<div class="breuk-disp"><div class="bt">${ts}</div></div>`;
+  return `<div class="breuk-disp"><div class="bt">${ts}</div><div class="bs"></div><div class="bn">${n}</div></div>`;
 }
+function biHTML(t,n){ return `<span class="b-inline"><span>${t}</span><span class="bi-streep"></span><span>${n}</span></span>`; }
 
-function breukInlineHTML(t, n) {
-  return `<span class="b-inline"><span>${t}</span><span class="bi-streep"></span><span>${n}</span></span>`;
-}
-
-// ── Maak één invoer-breuk element ──
-function maakBreukInvoer(kolomId, stapIdx) {
+/* ─── Stap-object aanmaken ─────────────────────────────── */
+/*
+  Elk stap-object heeft:
+    teller, noemer  — null of getal
+    fase            — 'buf' | 'frac'
+    bufTekst        — string (wat leerling typt vóór /)
+    wrap            — .iv-wrap element
+    bufSpan         — .iv-buf span
+    fracDiv         — .iv-frac div (of null)
+    nInput          — input voor noemer (of null)
+    rij             — de .stap-rij
+    plusBtn         — de + knop
+*/
+function maakStapObj(kolomId, stapIdx) {
   const wrap = document.createElement('div');
-  wrap.className = 'breuk-invoer-wrap';
-  wrap.dataset.kolom = kolomId;
-  wrap.dataset.stap = stapIdx;
+  wrap.className = 'iv-wrap';
+  wrap.dataset.kol = kolomId;
+  wrap.dataset.idx = stapIdx;
 
-  const inner = document.createElement('div');
-  inner.className = 'breuk-invoer-inner';
+  const bufSpan = document.createElement('div');
+  bufSpan.className = 'iv-buf';
+  wrap.appendChild(bufSpan);
 
-  const tInput = document.createElement('input');
-  tInput.type = 'text';
-  tInput.inputMode = 'numeric';
-  tInput.autocomplete = 'off';
-  tInput.spellcheck = false;
-  tInput.placeholder = '';
-  tInput.dataset.deel = 'teller';
-
-  const streep = document.createElement('div');
-  streep.className = 'in-streep';
-
-  const nInput = document.createElement('input');
-  nInput.type = 'text';
-  nInput.inputMode = 'numeric';
-  nInput.autocomplete = 'off';
-  nInput.spellcheck = false;
-  nInput.placeholder = '';
-  nInput.dataset.deel = 'noemer';
-
-  inner.appendChild(tInput);
-  inner.appendChild(streep);
-  inner.appendChild(nInput);
-  wrap.appendChild(inner);
-
-  // Focus events
-  const activeer = (deel) => {
-    actieveKolom = kolomId;
-    actieveStapIdx[kolomId] = stapIdx;
-    wrap.classList.add('actief');
-    // Verwijder actief van andere wraps
-    document.querySelectorAll('.breuk-invoer-wrap').forEach(w => {
-      if (w !== wrap) w.classList.remove('actief');
-    });
+  const obj = {
+    teller: null, noemer: null,
+    fase: 'buf', bufTekst: '',
+    wrap, bufSpan, fracDiv: null, nInput: null,
+    rij: null, plusBtn: null
   };
 
-  tInput.addEventListener('focus', () => activeer('teller'));
-  nInput.addEventListener('focus', () => activeer('noemer'));
-  wrap.addEventListener('click', (e) => {
-    if (!wrap.classList.contains('disabled')) {
-      // Klik op bovenkant → teller, onderkant → noemer
-      const rect = wrap.getBoundingClientRect();
-      const mid = rect.top + rect.height / 2;
-      if (e.clientY < mid) tInput.focus();
-      else nInput.focus();
+  // Klik op wrap → activeer
+  wrap.addEventListener('mousedown', e => {
+    e.preventDefault();
+    if(wrap.classList.contains('disabled')) return;
+    activeer(kolomId, stapIdx, obj);
+    if(obj.fase==='frac' && obj.nInput) obj.nInput.focus();
+  });
+
+  return obj;
+}
+
+function activeer(kolomId, stapIdx, obj) {
+  document.querySelectorAll('.iv-wrap').forEach(w=>w.classList.remove('actief'));
+  obj.wrap.classList.add('actief');
+  actief = { kolomId, stapIdx, obj };
+}
+
+function deactiveer() {
+  document.querySelectorAll('.iv-wrap').forEach(w=>w.classList.remove('actief'));
+  actief = null;
+}
+
+/* ─── Keyboard handler ─────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if(!actief) return;
+  const { kolomId, stapIdx, obj } = actief;
+  if(obj.wrap.classList.contains('disabled')) return;
+
+  // Als noemer-input gefocust is
+  if(obj.fase==='frac' && obj.nInput && document.activeElement===obj.nInput) {
+    if(e.key==='Backspace' && obj.nInput.value==='') {
+      e.preventDefault();
+      breuknaarBuf(kolomId, stapIdx, obj);
     }
-  });
+    return; // rest laat native input afhandelen
+  }
 
-  tInput.addEventListener('blur', () => {
-    setTimeout(() => {
-      const focused = document.activeElement;
-      if (!wrap.contains(focused)) wrap.classList.remove('actief');
-    }, 100);
-  });
-  nInput.addEventListener('blur', () => {
-    setTimeout(() => {
-      const focused = document.activeElement;
-      if (!wrap.contains(focused)) wrap.classList.remove('actief');
-    }, 100);
-  });
+  // Buffer-fase
+  if(obj.fase==='buf') {
+    if(/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
+      obj.bufTekst += e.key;
+      renderBuf(obj); syncData(kolomId, stapIdx, obj); updateCtrlKnop();
+    } else if(e.key==='-' && obj.bufTekst==='') {
+      e.preventDefault();
+      obj.bufTekst='-'; renderBuf(obj);
+    } else if(e.key==='/' && obj.bufTekst!=='' && obj.bufTekst!=='-') {
+      e.preventDefault();
+      obj.teller = parseInt(obj.bufTekst);
+      bufNaarBreuk(kolomId, stapIdx, obj);
+    } else if(e.key==='Backspace') {
+      e.preventDefault();
+      obj.bufTekst=obj.bufTekst.slice(0,-1);
+      renderBuf(obj); syncData(kolomId, stapIdx, obj); updateCtrlKnop();
+    }
+  }
+});
 
-  tInput.addEventListener('input', () => syncStapData(kolomId, stapIdx, tInput, nInput));
-  nInput.addEventListener('input', () => syncStapData(kolomId, stapIdx, tInput, nInput));
+function renderBuf(obj) { obj.bufSpan.textContent = obj.bufTekst; }
 
-  return { wrap, tInput, nInput };
+function bufNaarBreuk(kolomId, stapIdx, obj) {
+  obj.bufSpan.style.display='none';
+  const fd = document.createElement('div');
+  fd.className='iv-frac';
+  const td=document.createElement('div'); td.className='iv-teller'; td.textContent=obj.teller;
+  const sd=document.createElement('div'); sd.className='iv-streep';
+  const ni=document.createElement('input');
+  ni.type='text'; ni.inputMode='numeric'; ni.autocomplete='off'; ni.spellcheck=false;
+  fd.appendChild(td); fd.appendChild(sd); fd.appendChild(ni);
+  obj.wrap.appendChild(fd);
+  obj.fracDiv=fd; obj.nInput=ni; obj.fase='frac';
+
+  ni.addEventListener('input', ()=>{
+    const n=parseInt(ni.value);
+    obj.noemer=isNaN(n)?null:n;
+    syncData(kolomId,stapIdx,obj); updateCtrlKnop();
+  });
+  ni.addEventListener('focus', ()=> activeer(kolomId,stapIdx,obj));
+  ni.addEventListener('blur', ()=>{
+    setTimeout(()=>{
+      if(!obj.wrap.contains(document.activeElement)){
+        obj.wrap.classList.remove('actief');
+        if(actief&&actief.obj===obj) actief=null;
+      }
+    },100);
+  });
+  ni.focus();
 }
 
-function syncStapData(kolomId, stapIdx, tInput, nInput) {
-  const stappen = kolomId === 'b1' ? stappenB1 : stappenB2;
-  const t = parseInt(tInput.value);
-  const n = parseInt(nInput.value);
-  stappen[stapIdx].teller = isNaN(t) ? null : t;
-  stappen[stapIdx].noemer = isNaN(n) ? null : n;
-  updateControleerKnop();
+function breuknaarBuf(kolomId, stapIdx, obj) {
+  if(obj.fracDiv){ obj.fracDiv.remove(); obj.fracDiv=null; obj.nInput=null; }
+  obj.bufSpan.style.display='';
+  obj.bufTekst = obj.teller!==null ? obj.teller.toString() : '';
+  obj.teller=null; obj.noemer=null; obj.fase='buf';
+  renderBuf(obj); syncData(kolomId,stapIdx,obj); updateCtrlKnop();
 }
 
-function updateControleerKnop() {
-  const btn = document.getElementById('controleer-btn');
-  if (!btn) return;
-  // Actief als minstens het laatste ingevulde veld in beide kolommen een geldige breuk heeft
-  const laatsB1 = getLaatsteGeldigeStap(stappenB1);
-  const laatsB2 = getLaatsteGeldigeStap(stappenB2);
-  btn.disabled = !(laatsB1 !== null && laatsB2 !== null);
+function syncData(kolomId, stapIdx, obj) {
+  const st=kolomId==='b1'?stappenB1:stappenB2;
+  if(st[stapIdx]){ st[stapIdx].teller=obj.teller; st[stapIdx].noemer=obj.noemer; }
 }
 
-function getLaatsteGeldigeStap(stappen) {
-  for (let i = stappen.length - 1; i >= 0; i--) {
-    const s = stappen[i];
-    if (s.teller !== null && s.noemer !== null && s.noemer !== 0) return s;
+function updateCtrlKnop() {
+  const btn=document.getElementById('controleer-btn');
+  if(!btn) return;
+  btn.disabled=!(getLaatste(stappenB1)&&getLaatste(stappenB2));
+}
+
+function getLaatste(stappen) {
+  for(let i=stappen.length-1;i>=0;i--){
+    const s=stappen[i];
+    if(s.teller!==null&&s.noemer!==null&&s.noemer!==0) return s;
   }
   return null;
 }
 
-// ── Oefening tonen ──
+/* ─── Oefening opbouwen ────────────────────────────────── */
 function toonOefening() {
-  if (huidigeIdx >= TOTAAL) { toonEindscherm(); return; }
-
-  pogingTeller = 0;
-  stappenB1 = [];
-  stappenB2 = [];
+  if(huidigeIdx>=TOTAAL){ toonEindscherm(); return; }
+  pogingTeller=0; stappenB1=[]; stappenB2=[]; actief=null;
   updateVoortgang();
+  const oef=opgaven[huidigeIdx];
 
-  const oef = opgaven[huidigeIdx];
-  const isGeheel = oef.isGeheelGetal;
-
-  // HTML opbouwen
-  const inhoud = document.getElementById('inhoud');
-  inhoud.innerHTML = '';
-
-  const kaart = document.createElement('div');
-  kaart.className = 'oefening-kaart';
+  const ih=document.getElementById('inhoud'); ih.innerHTML='';
+  const kaart=document.createElement('div'); kaart.className='oefening-kaart';
 
   // Label
-  const label = document.createElement('p');
-  label.className = 'vraag-label';
-  label.textContent = 'Maak gelijknamig';
-  kaart.appendChild(label);
+  const lbl=document.createElement('span'); lbl.className='vraag-label'; lbl.textContent='Maak gelijknamig';
+  kaart.appendChild(lbl);
 
-  // Opgave display
-  const opgaveRij = document.createElement('div');
-  opgaveRij.className = 'opgave-rij';
+  // Opgave grid
+  const og=document.createElement('div'); og.className='opgave-grid';
+  const oc1=document.createElement('div'); oc1.className='opgave-cel'; oc1.innerHTML=breukDisp(oef.b1.t,oef.b1.n);
+  const od=document.createElement('div'); od.className='opgave-div';
+  const oc2=document.createElement('div'); oc2.className='opgave-cel';
+  oc2.innerHTML=oef.isGeheel?`<div class="breuk-disp"><div class="bt">${oef.b2.t}</div></div>`:breukDisp(oef.b2.t,oef.b2.n);
+  og.appendChild(oc1); og.appendChild(od); og.appendChild(oc2);
+  kaart.appendChild(og);
 
-  // Breuk 1
-  const w1 = document.createElement('div');
-  w1.className = 'opgave-breuk-wrap';
-  w1.innerHTML = breukHTML(oef.b1.t, oef.b1.n);
-  opgaveRij.appendChild(w1);
-
-  // "en"
-  const enSpan = document.createElement('span');
-  enSpan.className = 'opgave-en';
-  enSpan.textContent = 'en';
-  opgaveRij.appendChild(enSpan);
-
-  // Breuk 2
-  const w2 = document.createElement('div');
-  w2.className = 'opgave-breuk-wrap';
-  if (isGeheel) {
-    // Toon als geheel getal, niet als breuk
-    w2.innerHTML = `<div class="breuk-display"><div class="b-teller">${oef.b2.t}</div></div>`;
-  } else {
-    w2.innerHTML = breukHTML(oef.b2.t, oef.b2.n);
-  }
-  opgaveRij.appendChild(w2);
-  kaart.appendChild(opgaveRij);
-
-  // Invoer sectie
-  const invoerSectie = document.createElement('div');
-  invoerSectie.className = 'invoer-sectie';
-
-  const kolom1 = maakBreukKolom('b1', oef);
-  const kolom2 = maakBreukKolom('b2', oef);
-  invoerSectie.appendChild(kolom1);
-  invoerSectie.appendChild(kolom2);
-  kaart.appendChild(invoerSectie);
+  // Invoer grid
+  const ig=document.createElement('div'); ig.className='invoer-grid';
+  const kol1=maakKolom('b1',oef);
+  const id=document.createElement('div'); id.className='invoer-div';
+  const kol2=maakKolom('b2',oef);
+  ig.appendChild(kol1); ig.appendChild(id); ig.appendChild(kol2);
+  kaart.appendChild(ig);
 
   // Knoppen
-  const knoppen = document.createElement('div');
-  knoppen.className = 'knoppen-rij';
-  const controleerBtn = document.createElement('button');
-  controleerBtn.className = 'btn btn-primair';
-  controleerBtn.id = 'controleer-btn';
-  controleerBtn.textContent = 'Controleer';
-  controleerBtn.disabled = true;
-  const volgendeBtn = document.createElement('button');
-  volgendeBtn.className = 'btn btn-succes';
-  volgendeBtn.id = 'volgende-btn';
-  volgendeBtn.textContent = 'Volgende oefening →';
-  volgendeBtn.style.display = 'none';
-  knoppen.appendChild(controleerBtn);
-  knoppen.appendChild(volgendeBtn);
-  kaart.appendChild(knoppen);
+  const kr=document.createElement('div'); kr.className='knoppen-rij';
+  const cb=document.createElement('button'); cb.className='btn btn-primair'; cb.id='controleer-btn'; cb.textContent='Controleer'; cb.disabled=true;
+  const vb=document.createElement('button'); vb.className='btn btn-succes'; vb.id='volgende-btn'; vb.textContent='Volgende oefening →'; vb.style.display='none';
+  kr.appendChild(cb); kr.appendChild(vb); kaart.appendChild(kr);
 
-  // Feedback
-  const fbBox = document.createElement('div');
-  fbBox.className = 'feedback-box';
-  fbBox.id = 'feedback-box';
-  kaart.appendChild(fbBox);
+  const fb=document.createElement('div'); fb.className='feedback-box'; fb.id='feedback-box'; kaart.appendChild(fb);
+  const rr=document.createElement('div'); rr.className='rekenregel-blok'; rr.id='rr-blok'; kaart.appendChild(rr);
 
-  const rrBlok = document.createElement('div');
-  rrBlok.className = 'rekenregel-blok';
-  rrBlok.id = 'rekenregel-blok';
-  kaart.appendChild(rrBlok);
+  ih.appendChild(kaart);
+  cb.addEventListener('click', controleer);
+  vb.addEventListener('click', ()=>toonOefening());
 
-  inhoud.appendChild(kaart);
-
-  // Events
-  controleerBtn.addEventListener('click', controleer);
-  volgendeBtn.addEventListener('click', () => toonOefening());
-
-  // Focus eerste invoer
-  setTimeout(() => {
-    const eerste = kaart.querySelector('.breuk-invoer-wrap input');
-    if (eerste) eerste.focus();
-  }, 50);
+  // Focus eerste veld
+  setTimeout(()=>{
+    if(stappenB1.length>0) activeer('b1',0,stappenB1[0]);
+  },60);
 }
 
-function maakBreukKolom(kolomId, oef) {
-  const kolom = document.createElement('div');
-  kolom.className = 'breuk-kolom';
-  kolom.id = `kolom-${kolomId}`;
-
-  // Voeg eerste stap toe
-  voegStapToe(kolomId, kolom, oef, true);
-
-  return kolom;
+function maakKolom(kolomId, oef) {
+  const kol=document.createElement('div'); kol.className='breuk-kolom'; kol.id=`kol-${kolomId}`;
+  voegStapToe(kolomId, kol, oef);
+  return kol;
 }
 
-function voegStapToe(kolomId, kolom, oef, isEerste = false) {
-  const stappen = kolomId === 'b1' ? stappenB1 : stappenB2;
-  const stapIdx = stappen.length;
+function voegStapToe(kolomId, kol, oef) {
+  const stappen=kolomId==='b1'?stappenB1:stappenB2;
+  const idx=stappen.length;
 
-  const blok = document.createElement('div');
-  blok.className = 'stap-blok';
+  const rij=document.createElement('div'); rij.className='stap-rij';
+  const eq=document.createElement('div'); eq.className='stap-eq'; eq.textContent='=';
+  rij.appendChild(eq);
 
-  // = teken
-  const eq = document.createElement('div');
-  eq.className = 'stap-equals';
-  eq.textContent = '=';
-  blok.appendChild(eq);
+  const obj=maakStapObj(kolomId,idx);
+  rij.appendChild(obj.wrap);
 
-  // Breuk invoer
-  const { wrap, tInput, nInput } = maakBreukInvoer(kolomId, stapIdx);
-  blok.appendChild(wrap);
+  const pb=document.createElement('button'); pb.className='plus-btn'; pb.textContent='+'; pb.title='Extra tussenstap toevoegen';
+  rij.appendChild(pb);
+  obj.rij=rij; obj.plusBtn=pb;
 
-  stappen.push({ teller: null, noemer: null, wrap, tInput, nInput, blok });
+  const stapData={teller:null,noemer:null,obj,rij,plusBtn:pb};
+  stappen.push(stapData);
 
-  // + knop (alleen na de huidige stap toevoegen als we er zijn)
-  const plusBtn = document.createElement('button');
-  plusBtn.className = 'stap-toevoeg-btn';
-  plusBtn.textContent = '+';
-  plusBtn.title = 'Extra tussenstap toevoegen';
-  plusBtn.id = `plus-${kolomId}-${stapIdx}`;
-  blok.appendChild(plusBtn);
-
-  plusBtn.addEventListener('click', () => {
-    if (stappen.length >= 5) return;
-    // Verberg huidige + knop
-    plusBtn.style.display = 'none';
-    // Verberg ook de andere kolom's + knop op hetzelfde niveau als ze synchroon lopen
-    const andereKolomId = kolomId === 'b1' ? 'b2' : 'b1';
-    const andereStappen = andereKolomId === 'b1' ? stappenB1 : stappenB2;
-    const andereKolom = document.getElementById(`kolom-${andereKolomId}`);
-
-    voegStapToe(kolomId, kolom, oef);
-    // Voeg ook toe aan andere kolom als die er niet al eentje bij heeft
-    if (andereStappen.length < stappen.length) {
-      const anderePlusBtn = andereKolom.querySelector(`.stap-toevoeg-btn:last-of-type`);
-      if (anderePlusBtn && anderePlusBtn.style.display !== 'none') {
-        anderePlusBtn.style.display = 'none';
-      }
-      voegStapToe(andereKolomId, andereKolom, oef);
+  pb.addEventListener('click',()=>{
+    const maxN=Math.max(stappenB1.length,stappenB2.length);
+    if(maxN>=5) return;
+    // Verberg plusBtns van beide kolommen op huidig niveau
+    pb.style.display='none';
+    const andId=kolomId==='b1'?'b2':'b1';
+    const andSt=andId==='b1'?stappenB1:stappenB2;
+    if(andSt.length>0) andSt[andSt.length-1].plusBtn.style.display='none';
+    // Voeg stap toe
+    const andKol=document.getElementById(`kol-${andId}`);
+    voegStapToe(kolomId,kol,oef);
+    if(andSt.length<stappen.length) voegStapToe(andId,andKol,oef);
+    // Disable + als max bereikt
+    if(Math.max(stappenB1.length,stappenB2.length)>=5){
+      stappenB1[stappenB1.length-1].plusBtn.disabled=true;
+      stappenB2[stappenB2.length-1].plusBtn.disabled=true;
     }
   });
 
-  kolom.appendChild(blok);
-
-  // Disable + als max bereikt
-  if (stappen.length >= 5) plusBtn.disabled = true;
-
-  return { wrap, tInput, nInput };
+  if(stappen.length>=5) pb.disabled=true;
+  kol.appendChild(rij);
 }
 
-// ── Controleer ──
+/* ─── Controleer ───────────────────────────────────────── */
 function controleer() {
-  const oef = opgaven[huidigeIdx];
-  const fbBox = document.getElementById('feedback-box');
-  const rrBlok = document.getElementById('rekenregel-blok');
-  const controleerBtn = document.getElementById('controleer-btn');
-  const volgendeBtn = document.getElementById('volgende-btn');
+  const oef=opgaven[huidigeIdx];
+  const fb=document.getElementById('feedback-box');
+  const rr=document.getElementById('rr-blok');
+  const cb=document.getElementById('controleer-btn');
+  const vb=document.getElementById('volgende-btn');
 
-  // Haal antwoorden op
-  const antwoordB1 = getLaatsteGeldigeStap(stappenB1);
-  const antwoordB2 = getLaatsteGeldigeStap(stappenB2);
+  const antB1=getLaatste(stappenB1);
+  const antB2=getLaatste(stappenB2);
+  const tusB1=stappenB1.slice(0,stappenB1.indexOf(antB1));
+  const tusB2=stappenB2.slice(0,stappenB2.indexOf(antB2));
 
-  // Tussenstappen (alles behalve de laatste)
-  const tussenB1 = stappenB1.slice(0, stappenB1.indexOf(antwoordB1));
-  const tussenB2 = stappenB2.slice(0, stappenB2.indexOf(antwoordB2));
+  const b1=oef.b1;
+  const b2=oef.isGeheel?{t:oef.b2.t,n:1}:oef.b2;
 
   // Valideer tussenstappen
-  const tussenResultaat = valideerTussenstappen(tussenB1, tussenB2, oef, antwoordB1, antwoordB2);
+  const foutT1=tusB1.filter(s=>s.teller!==null&&s.noemer!==null&&!breukGelijk(s.teller,s.noemer,b1.t,b1.n));
+  const foutT2=tusB2.filter(s=>s.teller!==null&&s.noemer!==null&&!breukGelijk(s.teller,s.noemer,b2.t,b2.n));
+  const tusOk=foutT1.length===0&&foutT2.length===0;
 
-  // Controleer antwoorden
-  const isCorrect = valideerAntwoorden(antwoordB1, antwoordB2, oef);
+  // Valideer antwoorden
+  const zelfdN=antB1&&antB2&&antB1.noemer===antB2.noemer;
+  const aOk1=zelfdN&&breukGelijk(antB1.teller,antB1.noemer,b1.t,b1.n);
+  const aOk2=zelfdN&&breukGelijk(antB2.teller,antB2.noemer,b2.t,b2.n);
+  const antOk=aOk1&&aOk2;
 
-  if (isCorrect && tussenResultaat.ok) {
-    // ── GOED ──
-    markeerAlles(true, tussenB1, tussenB2, antwoordB1, antwoordB2, tussenResultaat, true, oef);
+  // Markeer stappen
+  markeer(tusB1,tusB2,antB1,antB2,foutT1,foutT2,aOk1,aOk2,antOk&&tusOk);
 
-    if (pogingTeller === 0) { punten += 1; eerstePoging++; }
-    else { punten += 0.5; tweedePoging++; }
+  /* ── Alles goed ── */
+  if(antOk && tusOk) {
+    if(pogingTeller===0){punten+=1;eerstePoging++;}else{punten+=.5;tweedePoging++;}
     huidigeIdx++;
+    fb.className='feedback-box succes';
+    fb.innerHTML=pogingTeller===0?'✅ Correct! Goed gedaan!':'✅ Correct bij de tweede poging!';
+    fb.style.display='block'; rr.style.display='none';
+    cb.style.display='none'; vb.style.display='inline-block';
+    vergrendel(); updateVoortgang();
+    return;
+  }
 
-    fbBox.className = 'feedback-box succes';
-    fbBox.innerHTML = pogingTeller === 0 ? '✅ Correct! Goed gedaan!' : '✅ Correct bij de tweede poging!';
-    fbBox.style.display = 'block';
-    rrBlok.style.display = 'none';
-    controleerBtn.style.display = 'none';
-    volgendeBtn.style.display = 'inline-block';
-    vergrendelAlles();
-    updateVoortgang();
+  /* ── Antwoord juist, tussenstappen fout ── */
+  if(antOk && !tusOk) {
+    if(pogingTeller===0) {
+      fb.className='feedback-box geel';
+      fb.innerHTML='Je hebt het juiste antwoord, maar niet de juiste tussenstappen. Pas de tussenstappen aan.';
+      fb.style.display='block'; rr.style.display='none';
+      pogingTeller=1;
+      setTimeout(()=>{ smartReset(foutT1,foutT2,b1,b2,oef); updateCtrlKnop(); },900);
+    } else {
+      foutGegaan++; huidigeIdx++;
+      fb.className='feedback-box rood';
+      fb.innerHTML='Je hebt het juiste antwoord, maar niet de juiste tussenstappen. Daarom wordt deze oefening fout gerekend.';
+      fb.style.display='block'; rr.style.display='none';
+      cb.style.display='none'; vb.style.display='inline-block';
+      vergrendel(); updateVoortgang();
+    }
+    return;
+  }
 
-  } else if (pogingTeller === 0) {
-    // ── EERSTE FOUT ──
-    markeerAlles(false, tussenB1, tussenB2, antwoordB1, antwoordB2, tussenResultaat, false, oef);
-
-    fbBox.className = 'feedback-box fout-tijdelijk';
-    fbBox.innerHTML = 'Je antwoord is niet juist. Bekijk de rekenregel en probeer opnieuw.';
-    fbBox.style.display = 'block';
-
-    rrBlok.innerHTML = `
-      <div class="rr-titel">REKENREGEL</div>
-      <ul>
-        <li>Vereenvoudig eerst de breuken.</li>
-        <li>Bereken het kleinste gemeenschappelijk veelvoud van de noemers.</li>
-        <li>Schrijf elke breuk met als noemer dit kleinste gemeenschappelijk veelvoud.</li>
-      </ul>
-      <div class="rr-opgelet">Let op het toestandsteken!</div>
-    `;
-    rrBlok.style.display = 'block';
-    pogingTeller = 1;
-
-    setTimeout(() => {
-      resetInvoer();
-      controleerBtn.disabled = true;
-    }, 900);
-
+  /* ── Fout antwoord ── */
+  if(pogingTeller===0) {
+    fb.className='feedback-box geel';
+    fb.innerHTML='Je antwoord is niet juist. Bekijk de rekenregel en probeer opnieuw.';
+    fb.style.display='block';
+    rr.innerHTML=`<div class="rr-titel">REKENREGEL</div><ul>
+      <li>Vereenvoudig eerst de breuken.</li>
+      <li>Bereken het kleinste gemeenschappelijk veelvoud van de noemers.</li>
+      <li>Schrijf elke breuk met als noemer dit kleinste gemeenschappelijk veelvoud.</li>
+    </ul><div class="rr-opgelet">Let op het toestandsteken!</div>`;
+    rr.style.display='block';
+    pogingTeller=1;
+    setTimeout(()=>{ smartReset(foutT1,foutT2,b1,b2,oef); updateCtrlKnop(); },900);
   } else {
-    // ── TWEEDE FOUT ── definitief
-    markeerAlles(false, tussenB1, tussenB2, antwoordB1, antwoordB2, tussenResultaat, false, oef);
-    foutGegaan++;
-    huidigeIdx++;
-
-    rrBlok.style.display = 'none';
-    fbBox.className = 'feedback-box fout-definitief';
-    fbBox.innerHTML = bouwDefinitieveFeedback(antwoordB1, antwoordB2, oef);
-    fbBox.style.display = 'block';
-    controleerBtn.style.display = 'none';
-    volgendeBtn.style.display = 'inline-block';
-    vergrendelAlles();
-    updateVoortgang();
+    foutGegaan++; huidigeIdx++;
+    rr.style.display='none';
+    fb.className='feedback-box rood';
+    fb.innerHTML=defFeedback(antB1,antB2,oef);
+    fb.style.display='block';
+    cb.style.display='none'; vb.style.display='inline-block';
+    vergrendel(); updateVoortgang();
   }
 }
 
-// ── Validatie ──
-function valideerTussenstappen(tussenB1, tussenB2, oef, antB1, antB2) {
-  // Elke tussenstap in kolom 1 moet gelijk zijn aan breuk1
-  const b1 = oef.b1;
-  const b2 = oef.isGeheelGetal ? { t: oef.b2.t, n: 1 } : oef.b2;
-
-  let fouteB1 = [];
-  let fouteB2 = [];
-
-  for (const s of tussenB1) {
-    if (s.teller === null || s.noemer === null) continue;
-    if (!breukGelijk(s.teller, s.noemer, b1.t, b1.n)) fouteB1.push(s);
-  }
-  for (const s of tussenB2) {
-    if (s.teller === null || s.noemer === null) continue;
-    if (!breukGelijk(s.teller, s.noemer, b2.t, b2.n)) fouteB2.push(s);
-  }
-
-  return { ok: fouteB1.length === 0 && fouteB2.length === 0, fouteB1, fouteB2 };
+/* ─── Markeren ─────────────────────────────────────────── */
+function markeer(tusB1,tusB2,antB1,antB2,foutT1,foutT2,aOk1,aOk2,allesGoed) {
+  const setF1=new Set(foutT1), setF2=new Set(foutT2);
+  for(const s of tusB1){ s.obj.wrap.classList.toggle('fout',setF1.has(s)); if(allesGoed){s.obj.wrap.classList.remove('fout');s.obj.wrap.classList.add('correct');} }
+  for(const s of tusB2){ s.obj.wrap.classList.toggle('fout',setF2.has(s)); if(allesGoed){s.obj.wrap.classList.remove('fout');s.obj.wrap.classList.add('correct');} }
+  if(antB1){ antB1.obj.wrap.classList.toggle('correct',aOk1); antB1.obj.wrap.classList.toggle('fout',!aOk1); }
+  if(antB2){ antB2.obj.wrap.classList.toggle('correct',aOk2); antB2.obj.wrap.classList.toggle('fout',!aOk2); }
 }
 
-function valideerAntwoorden(antB1, antB2, oef) {
-  if (!antB1 || !antB2) return false;
-  const b1 = oef.b1;
-  const b2 = oef.isGeheelGetal ? { t: oef.b2.t, n: 1 } : oef.b2;
+/* ─── Smart reset ──────────────────────────────────────── */
+// Verwijder enkel de foute tussenstappen en alles daarna (in elke kolom).
+// Juiste tussenstappen blijven staan.
+function smartReset(foutT1, foutT2, b1, b2, oef) {
+  ['b1','b2'].forEach(kolomId=>{
+    const stappen=kolomId==='b1'?stappenB1:stappenB2;
+    const foutSet=new Set(kolomId==='b1'?foutT1:foutT2);
+    const kol=document.getElementById(`kol-${kolomId}`);
 
-  // Zelfde noemer?
-  if (antB1.noemer !== antB2.noemer) return false;
+    // Zoek de index van de eerste foute stap (tussenstap = niet de laatste)
+    const antwoord=getLaatste(stappen);
+    const antIdx=stappen.indexOf(antwoord);
 
-  // Beide gelijk aan de overeenkomstige breuk?
-  const ok1 = breukGelijk(antB1.teller, antB1.noemer, b1.t, b1.n);
-  const ok2 = breukGelijk(antB2.teller, antB2.noemer, b2.t, b2.n);
-
-  return ok1 && ok2;
-}
-
-// ── Markeren ──
-function markeerAlles(allGoed, tussenB1, tussenB2, antB1, antB2, tussenResultaat, antwoordCorrect, oef) {
-  // Markeer foute tussenstappen
-  for (const s of tussenResultaat.fouteB1) s.wrap.classList.add('fout');
-  for (const s of tussenResultaat.fouteB2) s.wrap.classList.add('fout');
-
-  if (allGoed) {
-    [...tussenB1, antB1].forEach(s => { if(s) { s.wrap.classList.remove('fout'); s.wrap.classList.add('correct'); } });
-    [...tussenB2, antB2].forEach(s => { if(s) { s.wrap.classList.remove('fout'); s.wrap.classList.add('correct'); } });
-  } else if (antB1 && antB2 && oef) {
-    const b1 = oef.b1;
-    const b2 = oef.isGeheelGetal ? { t: oef.b2.t, n: 1 } : oef.b2;
-    const zelfdNoemer = antB1.noemer === antB2.noemer;
-    const ok1 = zelfdNoemer && breukGelijk(antB1.teller, antB1.noemer, b1.t, b1.n);
-    const ok2 = zelfdNoemer && breukGelijk(antB2.teller, antB2.noemer, b2.t, b2.n);
-    if (!ok1) antB1.wrap.classList.add('fout'); else antB1.wrap.classList.add('correct');
-    if (!ok2) antB2.wrap.classList.add('fout'); else antB2.wrap.classList.add('correct');
-  }
-}
-
-function vergrendelAlles() {
-  document.querySelectorAll('.breuk-invoer-wrap').forEach(w => {
-    w.classList.add('disabled');
-    w.querySelectorAll('input').forEach(i => i.disabled = true);
-  });
-  document.querySelectorAll('.stap-toevoeg-btn').forEach(b => b.disabled = true);
-}
-
-function resetInvoer() {
-  // Verwijder alle stappen behalve de eerste in elke kolom
-  ['b1','b2'].forEach(kolomId => {
-    const stappen = kolomId === 'b1' ? stappenB1 : stappenB2;
-    const kolom = document.getElementById(`kolom-${kolomId}`);
-
-    // Verwijder stap-blokken na de eerste
-    const blokken = kolom.querySelectorAll('.stap-blok');
-    blokken.forEach((b, i) => { if (i > 0) b.remove(); });
-
-    // Reset eerste stap
-    if (stappen.length > 0) {
-      stappen[0].teller = null;
-      stappen[0].noemer = null;
-      stappen[0].tInput.value = '';
-      stappen[0].nInput.value = '';
-      stappen[0].wrap.classList.remove('fout','correct','actief');
-      stappen[0].wrap.classList.remove('disabled');
-      stappen[0].tInput.disabled = false;
-      stappen[0].nInput.disabled = false;
+    // Kijk welke tussenstappen fout zijn
+    let eersteHouteIdx=-1;
+    for(let i=0;i<antIdx;i++){
+      if(foutSet.has(stappen[i])){ eersteHouteIdx=i; break; }
     }
 
-    // Herstel de + knop van de eerste stap
-    const plusBtn = kolom.querySelector('.stap-toevoeg-btn');
-    if (plusBtn) {
-      plusBtn.style.display = 'flex';
-      plusBtn.disabled = false;
+    // Bepaal verwijderpunt: eerste fout (of antwoord als geen foute tussenstap)
+    const verwijderVanaf = eersteHouteIdx>=0 ? eersteHouteIdx : antIdx;
+
+    // Verwijder rijen
+    const teVerw=stappen.slice(verwijderVanaf);
+    teVerw.forEach(s=>s.rij.remove());
+    stappen.splice(verwijderVanaf);
+
+    // Herstel plusBtn van de stap vóór verwijderpunt
+    if(verwijderVanaf>0 && stappen.length>0) {
+      const vorigeStap=stappen[stappen.length-1];
+      vorigeStap.plusBtn.style.display='flex';
+      vorigeStap.plusBtn.disabled=false;
     }
 
-    // Reset stappen array naar alleen eerste element
-    if (stappen.length > 0) {
-      const eersteStap = stappen[0];
-      stappen.length = 0;
-      stappen.push(eersteStap);
-    }
+    // Verwijder fout/correct klassen van overgebleven stappen
+    stappen.forEach(s=>{ s.obj.wrap.classList.remove('fout','correct','actief','disabled'); });
+
+    // Voeg één nieuwe lege stap toe
+    voegStapToe(kolomId, kol, oef);
   });
 
-  // Focus eerste invoer
-  const eerste = document.querySelector('#kolom-b1 .breuk-invoer-wrap input');
-  if (eerste) eerste.focus();
+  // Focus op eerste nieuw veld van b1
+  const nieuw=stappenB1[stappenB1.length-1];
+  if(nieuw) activeer('b1', stappenB1.length-1, nieuw);
 }
 
-// ── Definitieve feedback ──
-function bouwDefinitieveFeedback(antB1, antB2, oef) {
-  const b1 = oef.b1;
-  const b2 = oef.isGeheelGetal ? { t: oef.b2.t, n: 1 } : oef.b2;
-
-  // Bereken correct antwoord
-  const l = kgv(b1.n, b2.n);
-  const corrT1 = b1.t * (l / b1.n);
-  const corrT2 = b2.t * (l / b2.n);
-
-  const corrB1Html = breukInlineHTML(corrT1, l);
-  const corrB2Html = breukInlineHTML(corrT2, l);
-
-  // Geval: noemers niet gelijk
-  if (!antB1 || !antB2 || antB1.noemer !== antB2.noemer) {
-    return `Je antwoord is niet juist. Gelijknamige breuken hebben dezelfde noemer. Dat is bij jou niet het geval.<br>
-    Het juiste antwoord is ${corrB1Html} en ${corrB2Html}.`;
-  }
-
-  // Noemers zijn gelijk, maar inhoud fout
-  const ok1 = breukGelijk(antB1.teller, antB1.noemer, b1.t, b1.n);
-  const ok2 = breukGelijk(antB2.teller, antB2.noemer, b2.t, b2.n);
-
-  // Controleer: alleen toestandsteken fout?
-  const absOk1 = Math.abs(antB1.teller) * Math.abs(b1.n) === Math.abs(b1.t) * Math.abs(antB1.noemer);
-  const absOk2 = Math.abs(antB2.teller) * Math.abs(b2.n) === Math.abs(b2.t) * Math.abs(antB2.noemer);
-
-  const tekenFout1 = !ok1 && absOk1;
-  const tekenFout2 = !ok2 && absOk2;
-  const alleenTekenFout = (!ok1 || !ok2) && (tekenFout1 || tekenFout2) && (ok1 || tekenFout1) && (ok2 || tekenFout2);
-
-  if (alleenTekenFout) {
-    return `Je antwoord is niet juist. Let op het toestandsteken!<br>
-    Het juiste antwoord is ${corrB1Html} en ${corrB2Html}.`;
-  }
-
-  // Inhoudelijk fout
-  let tekst = 'Je antwoord is niet juist. De breuken hebben wel dezelfde noemer, maar ';
-  let delen = [];
-  if (!ok1) {
-    const antB1Html = breukInlineHTML(antB1.teller, antB1.noemer);
-    const origB1Html = breukInlineHTML(b1.t, b1.n);
-    delen.push(`de breuk ${antB1Html} is niet gelijk aan de breuk ${origB1Html}`);
-  }
-  if (!ok2) {
-    const antB2Html = breukInlineHTML(antB2.teller, antB2.noemer);
-    const origB2Html = breukInlineHTML(b2.t, b2.n);
-    delen.push(`de breuk ${antB2Html} is niet gelijk aan de breuk ${origB2Html}`);
-  }
-  tekst += delen.join(' en ') + '.<br>';
-  tekst += `Het juiste antwoord is ${corrB1Html} en ${corrB2Html}.`;
-  return tekst;
+function vergrendel() {
+  document.querySelectorAll('.iv-wrap').forEach(w=>{ w.classList.add('disabled'); w.querySelectorAll('input').forEach(i=>i.disabled=true); });
+  document.querySelectorAll('.plus-btn').forEach(b=>b.disabled=true);
+  actief=null;
 }
 
-// ── Eindscherm ──
+/* ─── Definitieve feedback ─────────────────────────────── */
+function defFeedback(antB1,antB2,oef) {
+  const b1=oef.b1, b2=oef.isGeheel?{t:oef.b2.t,n:1}:oef.b2;
+  const l=kgv(b1.n,b2.n);
+  const cT1=b1.t*(l/b1.n), cT2=b2.t*(l/b2.n);
+  const cB1=biHTML(cT1,l), cB2=biHTML(cT2,l);
+
+  if(!antB1||!antB2||antB1.noemer!==antB2.noemer)
+    return `Je antwoord is niet juist. Gelijknamige breuken hebben dezelfde noemer. Dat is bij jou niet het geval.<br>Het juiste antwoord is ${cB1} en ${cB2}.`;
+
+  const ok1=breukGelijk(antB1.teller,antB1.noemer,b1.t,b1.n);
+  const ok2=breukGelijk(antB2.teller,antB2.noemer,b2.t,b2.n);
+  const aOk1=Math.abs(antB1.teller)*Math.abs(b1.n)===Math.abs(b1.t)*Math.abs(antB1.noemer);
+  const aOk2=Math.abs(antB2.teller)*Math.abs(b2.n)===Math.abs(b2.t)*Math.abs(antB2.noemer);
+  const alleenTeken=(!ok1?aOk1:true)&&(!ok2?aOk2:true)&&(!ok1||!ok2);
+
+  if(alleenTeken)
+    return `Je antwoord is niet juist. Let op het toestandsteken!<br>Het juiste antwoord is ${cB1} en ${cB2}.`;
+
+  const delen=[];
+  if(!ok1) delen.push(`de breuk ${biHTML(antB1.teller,antB1.noemer)} is niet gelijk aan de breuk ${biHTML(b1.t,b1.n)}`);
+  if(!ok2) delen.push(`de breuk ${biHTML(antB2.teller,antB2.noemer)} is niet gelijk aan de breuk ${biHTML(b2.t,b2.n)}`);
+  return `Je antwoord is niet juist. De breuken hebben wel dezelfde noemer, maar ${delen.join(' en ')}.<br>Het juiste antwoord is ${cB1} en ${cB2}.`;
+}
+
+/* ─── Eindscherm ───────────────────────────────────────── */
 function toonEindscherm() {
   updateVoortgang();
-
-  let algScore, emoji, bericht;
-  if (punten >= 5) {
-    algScore = 'A'; emoji = '🌟';
-    bericht = 'Uitstekend! Je maakt breuken gelijknamig als een pro.';
-  } else if (punten >= 4) {
-    algScore = 'B'; emoji = '😊';
-    bericht = 'Goed gedaan! Nog een beetje oefenen en je hebt het helemaal onder de knie.';
-  } else {
-    algScore = 'C'; emoji = '📚';
-    bericht = 'Blijf oefenen. Je kan dit zeker verbeteren!';
-  }
-
-  document.getElementById('inhoud').innerHTML = `
+  let sc,em,ber;
+  if(punten>=5){sc='A';em='🌟';ber='Uitstekend! Je maakt breuken gelijknamig als een pro.';}
+  else if(punten>=4){sc='B';em='😊';ber='Goed gedaan! Nog een beetje oefenen en je hebt het helemaal onder de knie.';}
+  else{sc='C';em='📚';ber='Blijf oefenen. Je kan dit zeker verbeteren!';}
+  document.getElementById('inhoud').innerHTML=`
     <div class="eindscherm">
-      <div class="eind-emoji">${emoji}</div>
+      <div class="eind-emoji">${em}</div>
       <div class="eind-punten">${punten}/6</div>
       <div class="eind-score-label">Je haalde ${punten}/6</div>
-      <div class="score-badge ${algScore}">Score: ${algScore}</div>
-      <div class="eind-bericht">${bericht}</div>
+      <div class="score-badge ${sc}">Score: ${sc}</div>
+      <div class="eind-bericht">${ber}</div>
       <button class="btn btn-primair" id="terug-btn">← Terug naar oefeningen</button>
-    </div>
-  `;
-
-  document.getElementById('terug-btn').addEventListener('click', () => {
-    window.location.href = 'index.html';
-  });
-
-  slaanOp(algScore);
+    </div>`;
+  document.getElementById('terug-btn').addEventListener('click',()=>{ window.location.href='index.html'; });
+  slaanOp(sc);
 }
 
-// ── Firebase ──
-async function slaanOp(algScore) {
+async function slaanOp(sc) {
   try {
-    const docRef = doc(db, 'leerlingen', user.email);
-    await updateDoc(docRef, {
-      resultaten: arrayUnion({
-        type: TYPE_NR,
-        datum: new Date().toISOString(),
-        score: algScore,
-        totaal: punten,
-        eerste: eerstePoging,
-        tweede: tweedePoging,
-        fout: foutGegaan
-      })
-    });
-  } catch(err) {
-    console.error('Fout bij opslaan:', err);
-  }
+    await updateDoc(doc(db,'leerlingen',user.email),{resultaten:arrayUnion({
+      type:TYPE_NR,datum:new Date().toISOString(),score:sc,
+      totaal:punten,eerste:eerstePoging,tweede:tweedePoging,fout:foutGegaan
+    })});
+  } catch(e){ console.error('Opslaan mislukt:',e); }
 }
 
-// ── Init ──
-user = checkLogin();
-if (user) {
-  opgaven = genereerOpgaven();
-  toonOefening();
-}
+/* ─── Init ─────────────────────────────────────────────── */
+user=checkLogin();
+if(user){ opgaven=genereerOpgaven(); toonOefening(); }
 </script>
-
 </body>
 </html>
