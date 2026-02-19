@@ -213,7 +213,7 @@ const NOEMERS = [2,3,4,5,6,7,8,9,10,15,20];
 function irreducibel(neg=false) {
   let t,n;
   do { n=pick(NOEMERS); t=rand(1,n-1); } while(gcd(t,n)!==1);
-  if(neg && Math.random()<.5) t=-t;
+  if(neg) t=-t; // gegarandeerd negatief als neg=true
   return {t,n};
 }
 
@@ -221,12 +221,12 @@ function vereenvoudigbaar(neg=false) {
   let t,n,att=0;
   do {
     if(++att>200) return irreducibel(neg);
-    const b=irreducibel();
+    const b=irreducibel(); // altijd positieve basis
     const fs=[2,3,4,5].filter(f=>NOEMERS.includes(b.n*f)&&b.t*f<b.n*f);
     if(!fs.length) continue;
     const f=pick(fs); t=b.t*f; n=b.n*f;
   } while(gcd(t,n)===1||!NOEMERS.includes(n));
-  if(neg && Math.random()<.5) t=-t;
+  if(neg) t=-t; // gegarandeerd negatief als neg=true
   return {t,n};
 }
 
@@ -244,11 +244,18 @@ function genereerOpgaven() {
   const L=[];
   L.push({...paar(()=>irreducibel(),()=>irreducibel()),nr:1});
   L.push({...paar(()=>irreducibel(),()=>irreducibel()),nr:2});
-  const neg3=Math.random()<.5;
-  L.push({...paar(()=>irreducibel(neg3),()=>irreducibel(!neg3)),nr:3});
+  // Opgave 3: gegarandeerd minstens één negatieve breuk
+  const neg3b1=Math.random()<.5;
+  L.push({...paar(()=>irreducibel(neg3b1),()=>irreducibel(!neg3b1)),nr:3});
+  // Opgave 4: minstens één vereenvoudigbare breuk, beide positief
   const s4=Math.random()<.5;
   L.push({...paar(()=>s4?vereenvoudigbaar():irreducibel(),()=>s4?irreducibel():vereenvoudigbaar()),nr:4});
-  L.push({...paar(()=>vereenvoudigbaar(true),()=>irreducibel()),nr:5});
+  // Opgave 5: gegarandeerd minstens één negatief én minstens één vereenvoudigbaar
+  const neg5b1=Math.random()<.5;
+  L.push({...paar(
+    ()=>neg5b1?vereenvoudigbaar(true):irreducibel(),
+    ()=>neg5b1?irreducibel():vereenvoudigbaar(true)
+  ),nr:5});
   let b1_6,g;
   for(let i=0;i<300;i++){
     b1_6=irreducibel(); g=rand(2,10);
