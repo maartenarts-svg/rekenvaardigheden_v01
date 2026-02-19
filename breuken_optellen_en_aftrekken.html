@@ -510,6 +510,11 @@ function renderCursor(obj){
 }
 
 function verlaatveld(obj){
+  // Blur de noemer-input zodat zijn native caret verdwijnt
+  if(obj.actieveFracEl){
+    const ni=obj.actieveFracEl.querySelector('input[data-deel="noemer"]');
+    if(ni) ni.blur();
+  }
   setActieveFrac(obj, null);
   obj.wrap.appendChild(obj.cursEl);
   obj.wachtOpTeken=true; // eerste '-' hierna = operator
@@ -1031,13 +1036,22 @@ function maakUitwerking(oef,corrRes){
 function resetFout(tussenFout,antIdx,resetAntwoord,oef){
   const kolom=document.getElementById('invoer-kolom');
 
-  // Bepaal het vroegste te-verwijderen-punt
+  // Verwijder enkel vanaf de eerste foute tussenstap.
+  // Een fout eindantwoord zonder foute tussenstappen wordt NIET verwijderd.
   const eersteHout=tussenFout.length>0?Math.min(...tussenFout):null;
-  const verwijderVanaf=eersteHout!==null?eersteHout:(resetAntwoord?antIdx:null);
+  const verwijderVanaf=eersteHout; // null als geen foute tussenstap
 
   if(verwijderVanaf===null){
-    // Niets te verwijderen
+    // Geen foute tussenstap: niets verwijderen, klassen wissen volstaat
     stappen.forEach(s=>s.obj.wrap.classList.remove('fout','correct','actief','disabled'));
+    // Herstel plus-knop van laatste stap
+    if(stappen.length>0){
+      const l=stappen[stappen.length-1];
+      l.plusBtn.style.display='flex';
+      l.plusBtn.disabled=stappen.length>=5;
+    }
+    const huidig=stappen[stappen.length-1];
+    if(huidig) activeer(stappen.length-1,huidig.obj);
     return;
   }
 
@@ -1056,12 +1070,13 @@ function resetFout(tussenFout,antIdx,resetAntwoord,oef){
   // Verwijder klassen van overgebleven stappen
   stappen.forEach(s=>s.obj.wrap.classList.remove('fout','correct','actief','disabled'));
 
-  // Voeg nieuwe lege stap toe
-  voegStapToe(kolom,oef);
-  // Reset bufTekst van overgebleven stappen
-  stappen.forEach(s=>{if(s.bufTekst===undefined)s.bufTekst='';});
+  if(stappen.length===0){
+    // Alles verwijderd: voeg één leeg vak toe
+    voegStapToe(kolom,oef);
+  }
+  // Als er nog stappen zijn: geen nieuw leeg vak — leerling gebruikt de + knop
 
-  // Focus
+  // Focus op de nu-laatste stap
   const nieuw=stappen[stappen.length-1];
   if(nieuw) activeer(stappen.length-1,nieuw.obj);
 }
