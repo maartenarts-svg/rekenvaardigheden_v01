@@ -52,7 +52,7 @@
     .breuk-disp .bt { padding: 4px 10px; }
     .breuk-disp .bs { width: 100%; min-width: 36px; height: 3px; background: var(--text); border-radius: 2px; margin: 5px 0; }
     .breuk-disp .bn { padding: 4px 10px; }
-    .breuk-disp .neg { color: var(--warning); }
+      .breuk-disp .neg { /* geen kleur voor negatief */ }
 
     /* ── INVOER SECTIE: twee kolommen met verticale streep ── */
     .invoer-grid {
@@ -84,8 +84,9 @@
       min-width: 24px; text-align: center;
       display: inline-flex; align-items: center; justify-content: center;
     }
-    /* Knipperend cursor icoon */
-    .iv-buf::after { content: '|'; color: var(--accent); animation: blink 1s step-end infinite; margin-left: 1px; font-weight: 300; }
+    /* Knipperend cursor enkel in actief veld */
+    .iv-buf::after { content: ''; }
+    .iv-wrap.actief .iv-buf::after { content: '|'; color: var(--accent); animation: blink 1s step-end infinite; margin-left: 1px; font-weight: 300; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
     /* Breuk-invoer (na /) */
@@ -399,6 +400,8 @@ function breuknaarBuf(kolomId, stapIdx, obj) {
   obj.bufTekst = obj.teller!==null ? obj.teller.toString() : '';
   obj.teller=null; obj.noemer=null; obj.fase='buf';
   renderBuf(obj); syncData(kolomId,stapIdx,obj); updateCtrlKnop();
+  // Veld blijft actief na terugkeer naar buffer-fase
+  activeer(kolomId, stapIdx, obj);
 }
 
 function syncData(kolomId, stapIdx, obj) {
@@ -460,6 +463,12 @@ function toonOefening() {
   const fb=document.createElement('div'); fb.className='feedback-box'; fb.id='feedback-box'; kaart.appendChild(fb);
   const rr=document.createElement('div'); rr.className='rekenregel-blok'; rr.id='rr-blok'; kaart.appendChild(rr);
 
+  // Info-tekst
+  const info=document.createElement('p');
+  info.style.cssText='font-size:.78rem;color:var(--muted);margin-top:10px;margin-bottom:0;';
+  info.textContent='Druk op + voor een extra tussenstap als dat nodig is.';
+  kaart.appendChild(info);
+
   ih.appendChild(kaart);
   cb.addEventListener('click', controleer);
   vb.addEventListener('click', ()=>toonOefening());
@@ -495,22 +504,13 @@ function voegStapToe(kolomId, kol, oef) {
   stappen.push(stapData);
 
   pb.addEventListener('click',()=>{
-    const maxN=Math.max(stappenB1.length,stappenB2.length);
-    if(maxN>=5) return;
-    // Verberg plusBtns van beide kolommen op huidig niveau
+    if(stappen.length>=5) return;
+    // Verberg huidige + knop
     pb.style.display='none';
-    const andId=kolomId==='b1'?'b2':'b1';
-    const andSt=andId==='b1'?stappenB1:stappenB2;
-    if(andSt.length>0) andSt[andSt.length-1].plusBtn.style.display='none';
-    // Voeg stap toe
-    const andKol=document.getElementById(`kol-${andId}`);
+    // Voeg stap toe enkel aan deze kolom
     voegStapToe(kolomId,kol,oef);
-    if(andSt.length<stappen.length) voegStapToe(andId,andKol,oef);
-    // Disable + als max bereikt
-    if(Math.max(stappenB1.length,stappenB2.length)>=5){
-      stappenB1[stappenB1.length-1].plusBtn.disabled=true;
-      stappenB2[stappenB2.length-1].plusBtn.disabled=true;
-    }
+    // Disable als max bereikt
+    if(stappen.length>=5) stappen[stappen.length-1].plusBtn.disabled=true;
   });
 
   if(stappen.length>=5) pb.disabled=true;
@@ -612,37 +612,55 @@ function markeer(tusB1,tusB2,antB1,antB2,foutT1,foutT2,aOk1,aOk2,allesGoed) {
 }
 
 /* ─── Smart reset ──────────────────────────────────────── */
-// Verwijder enkel de foute tussenstappen en alles daarna (in elke kolom).
-// Juiste tussenstappen blijven staan.
+// Verwijder vanaf de eerste foute tussenstap en alles daarna.
+// Juiste tussenstappen én een juist antwoord (met juiste bovenliggende stappen) blijven staan.
 function smartReset(foutT1, foutT2, b1, b2, oef) {
+  // Bepaal per kolom welk antwoord correct is
+  const antB1=getLaatste(stappenB1);
+  const antB2=getLaatste(stappenB2);
+  const zelfdN=antB1&&antB2&&antB1.noemer===antB2.noemer;
+  const aOk1=zelfdN&&breukGelijk(antB1.teller,antB1.noemer,b1.t,b1.n);
+  const aOk2=zelfdN&&breukGelijk(antB2.teller,antB2.noemer,b2.t,b2.n);
+
   ['b1','b2'].forEach(kolomId=>{
     const stappen=kolomId==='b1'?stappenB1:stappenB2;
     const foutSet=new Set(kolomId==='b1'?foutT1:foutT2);
+    const antwoordOk=kolomId==='b1'?aOk1:aOk2;
     const kol=document.getElementById(`kol-${kolomId}`);
 
-    // Zoek de index van de eerste foute stap (tussenstap = niet de laatste)
     const antwoord=getLaatste(stappen);
     const antIdx=stappen.indexOf(antwoord);
 
-    // Kijk welke tussenstappen fout zijn
+    // Zoek de eerste foute tussenstap
     let eersteHouteIdx=-1;
     for(let i=0;i<antIdx;i++){
       if(foutSet.has(stappen[i])){ eersteHouteIdx=i; break; }
     }
 
-    // Bepaal verwijderpunt: eerste fout (of antwoord als geen foute tussenstap)
-    const verwijderVanaf = eersteHouteIdx>=0 ? eersteHouteIdx : antIdx;
+    // Als er een foute tussenstap is: verwijder vanaf die index
+    // Als er geen foute tussenstap is maar antwoord fout: verwijder alleen antwoord
+    // Als antwoord juist én alle tussenstappen juist: laat alles staan (mag niet hier komen, maar voor zekerheid)
+    let verwijderVanaf;
+    if(eersteHouteIdx>=0) {
+      verwijderVanaf=eersteHouteIdx;
+    } else if(!antwoordOk) {
+      verwijderVanaf=antIdx; // verwijder alleen het antwoord
+    } else {
+      // Antwoord juist, tussenstappen juist: niets verwijderen (niet verwacht in smartReset)
+      stappen.forEach(s=>{ s.obj.wrap.classList.remove('fout','actief','disabled'); });
+      return;
+    }
 
     // Verwijder rijen
     const teVerw=stappen.slice(verwijderVanaf);
     teVerw.forEach(s=>s.rij.remove());
     stappen.splice(verwijderVanaf);
 
-    // Herstel plusBtn van de stap vóór verwijderpunt
-    if(verwijderVanaf>0 && stappen.length>0) {
-      const vorigeStap=stappen[stappen.length-1];
-      vorigeStap.plusBtn.style.display='flex';
-      vorigeStap.plusBtn.disabled=false;
+    // Herstel plusBtn van de nu-laatste stap
+    if(stappen.length>0) {
+      const laatste=stappen[stappen.length-1];
+      laatste.plusBtn.style.display='flex';
+      laatste.plusBtn.disabled=stappen.length>=5;
     }
 
     // Verwijder fout/correct klassen van overgebleven stappen
