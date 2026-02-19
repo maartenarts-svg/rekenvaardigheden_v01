@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — Wiskunde Oefenplatform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0b0e14;
@@ -16,8 +16,15 @@
       --muted: #7a84a0;
       --accent: #5b8dee;
       --success: #4cbb8a;
+      --warning: #f5c842;
       --danger: #e05757;
       --radius: 12px;
+      
+      /* Pastel kleuren (voor groei-weergave) */
+      --score-a: #a8e6a1;
+      --score-b: #fff4a3;
+      --score-c: #ffcba4;
+      --hoogte-a: 80px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,7 +37,7 @@
     }
 
     .wrap {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
       padding: 32px 20px 60px;
     }
@@ -97,6 +104,7 @@
       margin-bottom: 20px;
     }
 
+    /* ── UPLOAD ZONE ── */
     .upload-zone {
       border: 2px dashed var(--border);
       border-radius: 10px;
@@ -137,6 +145,7 @@
       color: var(--muted);
     }
 
+    /* ── PREVIEW ── */
     .preview {
       margin-top: 20px;
       display: none;
@@ -190,6 +199,7 @@
       border-bottom: 1px solid rgba(255,255,255,0.03);
     }
 
+    /* ── KNOPPEN & INPUTS ── */
     .btn {
       padding: 11px 20px;
       border: none;
@@ -232,6 +242,44 @@
       flex-wrap: wrap;
     }
 
+    .select-veld, .input-veld {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      width: 100%;
+      max-width: 400px;
+      transition: border-color 0.2s;
+    }
+
+    .select-veld:focus, .input-veld:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .periode-select {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .datum-veld {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .datum-veld label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    /* ── BERICHT ── */
     .bericht {
       padding: 12px 16px;
       border-radius: 8px;
@@ -262,6 +310,7 @@
       color: var(--accent);
     }
 
+    /* ── STATISTIEKEN ── */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -290,6 +339,101 @@
       text-transform: uppercase;
       letter-spacing: 0.6px;
     }
+
+    /* ── GROEI VISUALISATIE (gekopieerd van groei.html) ── */
+    .groei-tabel {
+      margin-top: 20px;
+    }
+
+    .groei-rij {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .groei-rij:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .type-naam {
+      width: 280px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .status-icon {
+      font-size: 1.2rem;
+    }
+
+    .scores-container {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .score-blok {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .blok {
+      width: 50px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      border-radius: 6px 6px 0 0;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding-bottom: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+
+    .blok:hover {
+      transform: translateY(-3px);
+    }
+
+    .blok.score-a {
+      background: var(--score-a);
+      color: #2d5016;
+      height: var(--hoogte-a);
+    }
+
+    .blok.score-b {
+      background: var(--score-b);
+      color: #7a6c00;
+      height: calc(var(--hoogte-a) * 2 / 3);
+    }
+
+    .blok.score-c {
+      background: var(--score-c);
+      color: #8b4513;
+      height: calc(var(--hoogte-a) * 1 / 3);
+      min-height: 32px;
+    }
+
+    .datum {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .leeg {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -301,6 +445,7 @@
     <button class="logout-btn" onclick="uitloggen()">Uitloggen</button>
   </header>
 
+  <!-- CSV Upload -->
   <div class="sectie">
     <h2>📋 Leerlingen importeren</h2>
     <p>Upload een CSV-bestand met twee kolommen: <strong>email</strong> en <strong>naam</strong>. Scheidingsteken: komma.</p>
@@ -339,6 +484,7 @@
     <div class="bericht" id="upload-bericht"></div>
   </div>
 
+  <!-- Statistieken -->
   <div class="sectie">
     <h2>📊 Statistieken</h2>
     <div class="stats-grid">
@@ -351,17 +497,52 @@
         <div class="stat-label">Totaal oefeningen</div>
       </div>
     </div>
-    <p style="font-size:0.82rem;color:var(--muted);margin:0">
-      Gedetailleerde rapporten komen in een volgende fase.
-    </p>
+  </div>
+
+  <!-- Leerling groei bekijken -->
+  <div class="sectie">
+    <h2>👤 Leerling groei bekijken</h2>
+    <p>Selecteer een leerling om hun groeipagina te bekijken.</p>
+    
+    <div style="margin-bottom:16px">
+      <select id="leerling-select" class="select-veld">
+        <option value="">-- Selecteer een leerling --</option>
+      </select>
+    </div>
+
+    <div id="leerling-groei-container"></div>
+  </div>
+
+  <!-- Scorelijst downloaden -->
+  <div class="sectie">
+    <h2>📥 Scorelijst downloaden</h2>
+    <p>Download een CSV-bestand met de evaluatiescores voor een bepaalde periode.</p>
+    
+    <div class="periode-select">
+      <div class="datum-veld">
+        <label for="start-datum">Startdatum</label>
+        <input type="date" id="start-datum" class="input-veld" autocomplete="off">
+      </div>
+      <div class="datum-veld">
+        <label for="eind-datum">Einddatum</label>
+        <input type="date" id="eind-datum" class="input-veld" autocomplete="off">
+      </div>
+    </div>
+
+    <button class="btn btn-primair" id="download-btn" onclick="downloadScorelijst()">
+      📥 Download scorelijst (CSV)
+    </button>
+
+    <div class="bericht" id="download-bericht"></div>
   </div>
 
 </div>
 
 <script type="module">
-import { db } from './config.js';
-import { collection, doc, setDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { db, OEFENINGEN } from './config.js';
+import { collection, doc, setDoc, getDocs, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
+// ── LOGIN CHECK ──
 checkLogin();
 
 function checkLogin() {
@@ -388,6 +569,7 @@ window.uitloggen = function() {
   window.location.href = 'login.html';
 };
 
+// ── CSV UPLOAD ──
 let csvData = [];
 
 const uploadZone = document.getElementById('upload-zone');
@@ -445,7 +627,7 @@ function verwerkCSV(file) {
       toonPreview();
       
     } catch (err) {
-      toonBericht('fout', `Fout bij lezen CSV: ${err.message}`);
+      toonBericht('upload-bericht', 'fout', `Fout bij lezen CSV: ${err.message}`);
     }
   };
   
@@ -474,7 +656,7 @@ window.annuleren = function() {
   document.getElementById('preview').classList.remove('actief');
   document.getElementById('csv-input').value = '';
   csvData = [];
-  verbergBericht();
+  verbergBericht('upload-bericht');
 };
 
 document.getElementById('upload-btn').addEventListener('click', async () => {
@@ -482,7 +664,7 @@ document.getElementById('upload-btn').addEventListener('click', async () => {
   btn.disabled = true;
   btn.textContent = 'Bezig met importeren...';
   
-  toonBericht('info', `Leerlingen worden toegevoegd aan Firebase...`);
+  toonBericht('upload-bericht', 'info', `Leerlingen worden toegevoegd aan Firebase...`);
   
   try {
     let succes = 0;
@@ -502,28 +684,20 @@ document.getElementById('upload-btn').addEventListener('click', async () => {
       }
     }
     
-    toonBericht('succes', `✓ Import voltooid: ${succes} succesvol, ${fouten} fouten.`);
+    toonBericht('upload-bericht', 'succes', `✓ Import voltooid: ${succes} succesvol, ${fouten} fouten.`);
     annuleren();
     laadStatistieken();
+    laadLeerlingenDropdown();
     
   } catch (err) {
     console.error('Import fout:', err);
-    toonBericht('fout', `Fout bij importeren: ${err.message}`);
+    toonBericht('upload-bericht', 'fout', `Fout bij importeren: ${err.message}`);
     btn.disabled = false;
     btn.textContent = `Importeren (${csvData.length} leerlingen)`;
   }
 });
 
-function toonBericht(type, tekst) {
-  const el = document.getElementById('upload-bericht');
-  el.className = `bericht actief ${type}`;
-  el.textContent = tekst;
-}
-
-function verbergBericht() {
-  document.getElementById('upload-bericht').classList.remove('actief');
-}
-
+// ── STATISTIEKEN ──
 async function laadStatistieken() {
   try {
     const snapshot = await getDocs(collection(db, 'leerlingen'));
@@ -545,7 +719,304 @@ async function laadStatistieken() {
   }
 }
 
+// ── LEERLING DROPDOWN ──
+let alleLeerlingen = [];
+
+async function laadLeerlingenDropdown() {
+  try {
+    const snapshot = await getDocs(collection(db, 'leerlingen'));
+    alleLeerlingen = [];
+    
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      alleLeerlingen.push({
+        email: doc.id,
+        naam: data.naam || doc.id,
+        resultaten: data.resultaten || []
+      });
+    });
+    
+    alleLeerlingen.sort((a, b) => a.naam.localeCompare(b.naam));
+    
+    const select = document.getElementById('leerling-select');
+    select.innerHTML = '<option value="">-- Selecteer een leerling --</option>';
+    
+    alleLeerlingen.forEach((l, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = l.naam;
+      select.appendChild(opt);
+    });
+    
+  } catch (err) {
+    console.error('Fout bij laden leerlingen:', err);
+  }
+}
+
+document.getElementById('leerling-select').addEventListener('change', (e) => {
+  const idx = e.target.value;
+  const container = document.getElementById('leerling-groei-container');
+  
+  if (idx === '') {
+    container.innerHTML = '';
+    return;
+  }
+  
+  const leerling = alleLeerlingen[idx];
+  renderLeerlingGroei(leerling);
+});
+
+function renderLeerlingGroei(leerling) {
+  const container = document.getElementById('leerling-groei-container');
+  const resultaten = leerling.resultaten || [];
+  
+  if (resultaten.length === 0) {
+    container.innerHTML = `<div class="leeg">Deze leerling heeft nog geen oefeningen gemaakt.</div>`;
+    return;
+  }
+  
+  // Groepeer per type
+  const perType = {};
+  resultaten.forEach(r => {
+    if (!perType[r.type]) {
+      perType[r.type] = [];
+    }
+    perType[r.type].push(r);
+  });
+  
+  // Sorteer per type op datum (nieuwste eerst)
+  Object.keys(perType).forEach(type => {
+    perType[type].sort((a, b) => new Date(b.datum) - new Date(a.datum));
+  });
+  
+  // Render
+  let html = `<div class="groei-tabel">`;
+  
+  OEFENINGEN.forEach(oef => {
+    const scores = perType[oef.type] || [];
+    
+    // Status icon
+    const laatste3 = scores.slice(0, 3).map(s => s.score);
+    let statusIcon = '❗';
+    
+    if (laatste3.length >= 3) {
+      if (laatste3.every(s => s === 'A')) {
+        statusIcon = '⭐';
+      } else if (!laatste3.includes('C')) {
+        statusIcon = '😊';
+      }
+    }
+    
+    html += `
+      <div class="groei-rij">
+        <div class="type-naam">
+          <span class="status-icon">${statusIcon}</span>
+          <span>${oef.naam}</span>
+        </div>
+        <div class="scores-container">
+    `;
+    
+    if (scores.length === 0) {
+      html += `<span style="color:var(--muted);font-size:0.85rem;font-style:italic">Nog niet geoefend</span>`;
+    } else {
+      scores.forEach(score => {
+        const datum = new Date(score.datum);
+        const datumStr = `${String(datum.getDate()).padStart(2, '0')}/${String(datum.getMonth() + 1).padStart(2, '0')}`;
+        
+        html += `
+          <div class="score-blok">
+            <div class="blok score-${score.score.toLowerCase()}">${score.score}</div>
+            <div class="datum">${datumStr}</div>
+          </div>
+        `;
+      });
+    }
+    
+    html += `
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  
+  container.innerHTML = html;
+}
+
+// ── SCORELIJST DOWNLOADEN ──
+window.downloadScorelijst = async function() {
+  const startDatum = document.getElementById('start-datum').value;
+  const eindDatum = document.getElementById('eind-datum').value;
+  const berichtEl = 'download-bericht';
+  
+  if (!startDatum || !eindDatum) {
+    toonBericht(berichtEl, 'fout', 'Selecteer een start- en einddatum.');
+    return;
+  }
+  
+  const start = new Date(startDatum);
+  const eind = new Date(eindDatum);
+  eind.setHours(23, 59, 59); // Einde van de dag
+  
+  if (start > eind) {
+    toonBericht(berichtEl, 'fout', 'Startdatum moet voor einddatum liggen.');
+    return;
+  }
+  
+  toonBericht(berichtEl, 'info', 'Scorelijst wordt gegenereerd...');
+  
+  try {
+    const snapshot = await getDocs(collection(db, 'leerlingen'));
+    const scorelijst = [];
+    
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data();
+      const email = docSnap.id;
+      const naam = data.naam || email;
+      const alleResultaten = data.resultaten || [];
+      
+      // Resultaten IN periode
+      const inPeriode = alleResultaten.filter(r => {
+        const d = new Date(r.datum);
+        return d >= start && d <= eind;
+      });
+      
+      // Resultaten VOOR periode (voor status bij aanvang)
+      const dagVoorStart = new Date(start);
+      dagVoorStart.setDate(dagVoorStart.getDate() - 1);
+      const voorPeriode = alleResultaten.filter(r => new Date(r.datum) <= dagVoorStart);
+      
+      // Score 1: Aantal oefeningen
+      const score1 = inPeriode.length >= 3 ? 'A' : 'C';
+      
+      // Score 2: Verschillende types
+      const typesInPeriode = new Set(inPeriode.map(r => r.type));
+      const score2 = typesInPeriode.size >= 3 ? 'A' : 'C';
+      
+      // Score 3: Oefenen op moeilijke onderwerpen
+      const score3 = berekenScore3(voorPeriode, inPeriode, score2);
+      
+      scorelijst.push({
+        email,
+        naam,
+        score1,
+        score2,
+        score3
+      });
+    }
+    
+    // Genereer CSV
+    const csv = genereerCSV(scorelijst);
+    downloadCSV(csv, `scorelijst_${startDatum}_${eindDatum}.csv`);
+    
+    toonBericht(berichtEl, 'succes', '✓ Scorelijst gedownload!');
+    
+  } catch (err) {
+    console.error('Fout bij genereren scorelijst:', err);
+    toonBericht(berichtEl, 'fout', `Fout: ${err.message}`);
+  }
+};
+
+function berekenScore3(voorPeriode, inPeriode, score2) {
+  // Bepaal status bij aanvang per type
+  const perType = {};
+  OEFENINGEN.forEach(oef => {
+    perType[oef.type] = [];
+  });
+  
+  voorPeriode.forEach(r => {
+    if (perType[r.type]) {
+      perType[r.type].push(r);
+    }
+  });
+  
+  // Sorteer per type op datum (nieuwste eerst)
+  Object.keys(perType).forEach(type => {
+    perType[type].sort((a, b) => new Date(b.datum) - new Date(a.datum));
+  });
+  
+  // Bepaal status per type
+  const uitroepingstekens = [];
+  const smileys = [];
+  const sterren = [];
+  
+  OEFENINGEN.forEach(oef => {
+    const scores = perType[oef.type];
+    const laatste3 = scores.slice(0, 3).map(s => s.score);
+    
+    if (laatste3.length < 3 || laatste3.includes('C')) {
+      uitroepingstekens.push(oef.type);
+    } else if (laatste3.every(s => s === 'A')) {
+      sterren.push(oef.type);
+    } else {
+      smileys.push(oef.type);
+    }
+  });
+  
+  // Types waarop geoefend is in periode
+  const typesInPeriode = new Set(inPeriode.map(r => r.type));
+  
+  // Scenario 1: ≥3 uitroepingstekens + geoefend daarop
+  if (uitroepingstekens.length >= 3) {
+    const geoefendOpUitroep = uitroepingstekens.some(t => typesInPeriode.has(t));
+    if (geoefendOpUitroep) return 'A';
+  }
+  
+  // Scenario 2: <3 uitroepingstekens maar ≥3 (uitroep OF smiley) + geoefend daarop
+  if (uitroepingstekens.length < 3 && (uitroepingstekens.length + smileys.length) >= 3) {
+    const moeilijk = [...uitroepingstekens, ...smileys];
+    const geoefendOpMoeilijk = moeilijk.some(t => typesInPeriode.has(t));
+    if (geoefendOpMoeilijk) return 'A';
+  }
+  
+  // Scenario 3: <3 (uitroep OF smiley) maar ≥1 + geoefend daarop + score2 = A
+  if ((uitroepingstekens.length + smileys.length) < 3 && (uitroepingstekens.length + smileys.length) >= 1) {
+    const moeilijk = [...uitroepingstekens, ...smileys];
+    const geoefendOpMoeilijk = moeilijk.some(t => typesInPeriode.has(t));
+    if (geoefendOpMoeilijk && score2 === 'A') return 'A';
+  }
+  
+  // Scenario 4: Alleen sterren + score2 = A
+  if (uitroepingstekens.length === 0 && smileys.length === 0 && score2 === 'A') {
+    return 'A';
+  }
+  
+  // Scenario 5: Anders
+  return 'C';
+}
+
+function genereerCSV(data) {
+  const header = 'Email,Naam,Score 1 (Aantal),Score 2 (Types),Score 3 (Moeilijke onderwerpen)\n';
+  const rijen = data.map(r => `${r.email},${r.naam},${r.score1},${r.score2},${r.score3}`).join('\n');
+  return header + rijen;
+}
+
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// ── HELPERS ──
+function toonBericht(elementId, type, tekst) {
+  const el = document.getElementById(elementId);
+  el.className = `bericht actief ${type}`;
+  el.textContent = tekst;
+}
+
+function verbergBericht(elementId) {
+  document.getElementById(elementId).classList.remove('actief');
+}
+
+// ── INIT ──
 laadStatistieken();
+laadLeerlingenDropdown();
 </script>
 
 </body>
