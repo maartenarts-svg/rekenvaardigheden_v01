@@ -27,7 +27,7 @@ const OEFENINGEN = [
     beschrijving: "Bereken som, verschil, product en quotiënt van gehele getallen",
     url: "hoofdbewerkingen_gehele_getallen.html",
     kleur: "#4A90D9",
-    icon: "🔢"
+    icon: "🧮"
   },
   {
     type: 2,
@@ -35,7 +35,7 @@ const OEFENINGEN = [
     beschrijving: "Bereken som, verschil, product en quotiënt van gehele getallen",
     url: "breuken_gelijknamig_maken.html",
     kleur: "#4A90D9",
-    icon: "🔢"
+    icon: "🧩"
   },
   {
     type: 3,
@@ -43,7 +43,7 @@ const OEFENINGEN = [
     beschrijving: "Tel en trek breuken op met gelijke en ongelijke noemers",
     url: "breuken_optellen_en_aftrekken.html",
     kleur: "#4A90D9",
-    icon: "➕"
+    icon: "➕➖"
   },
   {
     type: 4,
@@ -67,7 +67,7 @@ const OEFENINGEN = [
     beschrijving: "Bereken machten van breuken",
     url: "oefening_macht_breuk.html",
     kleur: "#9B59B6",
-    icon: "⬆️"
+    icon: "💥"
   },
   {
     type: 7,
@@ -75,7 +75,7 @@ const OEFENINGEN = [
     beschrijving: "Pas de juiste volgorde van bewerkingen toe",
     url: "oefening_volgorde.html",
     kleur: "#E74C3C",
-    icon: "🔢"
+    icon: "🪜"
   }
 ];
 
