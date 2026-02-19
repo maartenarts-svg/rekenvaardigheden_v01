@@ -41,7 +41,7 @@ const OEFENINGEN = [
     type: 3,
     naam: "Breuken optellen & aftrekken",
     beschrijving: "Tel en trek breuken op met gelijke en ongelijke noemers",
-    url: "oefening_breuken_optellen.html",
+    url: "breuken_optellen_en_aftrekken.html",
     kleur: "#4A90D9",
     icon: "➕"
   },
