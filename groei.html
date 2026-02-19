@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mijn Groei — Wiskunde</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: rgba(255,255,255,0.08);
+      --text: #e8eaf0;
+      --muted: #8891aa;
+      --accent: #5b8dee;
+      
+      /* Pastel kleuren voor scores */
+      --score-a: #a8e6a1;  /* pastel groen */
+      --score-b: #fff4a3;  /* pastel geel */
+      --score-c: #ffcba4;  /* pastel oranje */
+      
+      /* Hoogte basiswaarde (A = 100%) */
+      --hoogte-a: 80px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 50% 40% at 80% 20%, rgba(76,187,138,0.1) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 50% at 10% 80%, rgba(91,141,238,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .page-title h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .page-title span {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* ── GROEI TABEL ── */
+    .groei-tabel {
+      margin-top: 32px;
+    }
+
+    .groei-rij {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      animation: fadeIn 0.4s ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .groei-rij:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .type-naam {
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .status-icon {
+      font-size: 1.2rem;
+    }
+
+    .scores-container {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .score-blok {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      animation: scaleIn 0.3s ease both;
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .blok {
+      width: 50px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      border-radius: 6px 6px 0 0;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding-bottom: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+
+    .blok:hover {
+      transform: translateY(-3px);
+    }
+
+    .blok.score-a {
+      background: var(--score-a);
+      color: #2d5016;
+      height: var(--hoogte-a);
+    }
+
+    .blok.score-b {
+      background: var(--score-b);
+      color: #7a6c00;
+      height: calc(var(--hoogte-a) * 2 / 3);
+    }
+
+    .blok.score-c {
+      background: var(--score-c);
+      color: #8b4513;
+      height: calc(var(--hoogte-a) * 1 / 3);
+      min-height: 32px; /* Zodat de C altijd leesbaar is */
+    }
+
+    .datum {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ── LEEG SCHERM ── */
+    .leeg {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .leeg .groot {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    /* ── LOADING ── */
+    .loading {
+      text-align: center;
+      padding: 80px 0;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .type-naam {
+        min-width: 140px;
+        font-size: 0.85rem;
+      }
+      .blok {
+        width: 40px;
+        font-size: 0.95rem;
+      }
+      :root {
+        --hoogte-a: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <a href="index.html" class="back-btn">← Terug naar oefeningen</a>
+    <div class="page-title">
+      <h1>📈 Mijn groei</h1>
+      <span id="user-naam">Laden...</span>
+    </div>
+  </header>
+
+  <div id="inhoud">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Jouw resultaten laden...</p>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { db, OEFENINGEN } from './config.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+// ── Check login ──
+const user = checkLogin();
+
+function checkLogin() {
+  const stored = localStorage.getItem('wiskunde_user');
+  if (!stored) {
+    window.location.href = 'login.html';
+    return null;
+  }
+  
+  try {
+    const user = JSON.parse(stored);
+    if (user.isAdmin) {
+      window.location.href = 'dashboard.html';
+      return null;
+    }
+    
+    document.getElementById('user-naam').textContent = user.naam || user.email;
+    return user;
+  } catch (e) {
+    localStorage.removeItem('wiskunde_user');
+    window.location.href = 'login.html';
+    return null;
+  }
+}
+
+// ── Data ophalen en renderen ──
+async function init() {
+  try {
+    const docRef = doc(db, 'leerlingen', user.email);
+    const docSnap = await getDoc(docRef);
+    
+    if (!docSnap.exists()) {
+      throw new Error('Geen data gevonden');
+    }
+    
+    const data = docSnap.data();
+    const resultaten = data.resultaten || [];
+    
+    renderGroei(resultaten);
+    
+  } catch (err) {
+    console.error('Fout bij laden:', err);
+    document.getElementById('inhoud').innerHTML = `
+      <div class="leeg">
+        <div class="groot">⚠️</div>
+        <p>Kon je gegevens niet laden.</p>
+        <p style="margin-top:8px;font-size:0.85rem">${err.message}</p>
+      </div>
+    `;
+  }
+}
+
+function renderGroei(resultaten) {
+  const container = document.getElementById('inhoud');
+  
+  if (!resultaten || resultaten.length === 0) {
+    container.innerHTML = `
+      <div class="leeg">
+        <div class="groot">🌱</div>
+        <p>Je hebt nog geen oefeningen gemaakt.</p>
+        <p style="margin-top:8px">Ga naar het controlepaneel en maak je eerste oefening!</p>
+      </div>
+    `;
+    return;
+  }
+  
+  // Groepeer per type
+  const perType = {};
+  
+  resultaten.forEach(r => {
+    if (!perType[r.type]) {
+      perType[r.type] = [];
+    }
+    perType[r.type].push(r);
+  });
+  
+  // Sorteer elke type op datum (nieuwste eerst = links)
+  Object.keys(perType).forEach(type => {
+    perType[type].sort((a, b) => new Date(b.datum) - new Date(a.datum));
+  });
+  
+  // Render volgens volgorde van OEFENINGEN
+  let html = '<div class="groei-tabel">';
+  
+  OEFENINGEN.forEach((oef, idx) => {
+    const scores = perType[oef.type] || [];
+    
+    // Bepaal status icon (laatste 3 scores)
+    const laatste3 = scores.slice(0, 3).map(s => s.score);
+    let statusIcon = '❗'; // default: rood uitroepingsteken
+    
+    if (laatste3.length >= 3) {
+      if (laatste3.every(s => s === 'A')) {
+        statusIcon = '⭐'; // gouden ster
+      } else if (!laatste3.includes('C')) {
+        statusIcon = '😊'; // smiley
+      }
+    }
+    
+    html += `
+      <div class="groei-rij" style="animation-delay:${idx * 0.08}s">
+        <div class="type-naam">
+          <span class="status-icon">${statusIcon}</span>
+          <span>${oef.naam}</span>
+        </div>
+        <div class="scores-container">
+    `;
+    
+    if (scores.length === 0) {
+      html += `<span style="color:var(--muted);font-size:0.85rem;font-style:italic">Nog niet geoefend</span>`;
+    } else {
+      scores.forEach((score, si) => {
+        const datum = new Date(score.datum);
+        const datumStr = `${String(datum.getDate()).padStart(2, '0')}/${String(datum.getMonth() + 1).padStart(2, '0')}`;
+        
+        html += `
+          <div class="score-blok" style="animation-delay:${(idx * 0.08) + (si * 0.05)}s">
+            <div class="blok score-${score.score.toLowerCase()}">${score.score}</div>
+            <div class="datum">${datumStr}</div>
+          </div>
+        `;
+      });
+    }
+    
+    html += `
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  
+  container.innerHTML = html;
+}
+
+init();
+</script>
+
+</body>
+</html>

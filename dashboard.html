@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Wiskunde Oefenplatform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --surface: #141720;
+      --surface2: #1c2030;
+      --border: rgba(255,255,255,0.07);
+      --text: #dde1ec;
+      --muted: #7a84a0;
+      --accent: #5b8dee;
+      --success: #4cbb8a;
+      --danger: #e05757;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+    }
+
+    h1 span {
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 0.9rem;
+      margin-left: 10px;
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .logout-btn:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .sectie {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .sectie h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .sectie p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface2);
+    }
+
+    .upload-zone:hover {
+      border-color: var(--accent);
+      background: rgba(91,141,238,0.05);
+    }
+
+    .upload-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(91,141,238,0.1);
+    }
+
+    .upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+
+    .upload-zone input[type="file"] {
+      display: none;
+    }
+
+    .upload-label {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .upload-hint {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .preview {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .preview.actief {
+      display: block;
+    }
+
+    .preview-titel {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .preview-tabel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: auto;
+      max-height: 300px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      background: var(--surface2);
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .btn {
+      padding: 11px 20px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primair {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primair:hover {
+      opacity: 0.85;
+    }
+
+    .btn-primair:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-secundair {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secundair:hover {
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .knoppen-rij {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .bericht {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .bericht.actief {
+      display: block;
+    }
+
+    .bericht.succes {
+      background: rgba(76,187,138,0.12);
+      border: 1px solid rgba(76,187,138,0.3);
+      color: var(--success);
+    }
+
+    .bericht.fout {
+      background: rgba(224,87,87,0.1);
+      border: 1px solid rgba(224,87,87,0.3);
+      color: var(--danger);
+    }
+
+    .bericht.info {
+      background: rgba(91,141,238,0.1);
+      border: 1px solid rgba(91,141,238,0.3);
+      color: var(--accent);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-kaart {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-getal {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <h1>🎓 Dashboard <span>Beheerder</span></h1>
+    <button class="logout-btn" onclick="uitloggen()">Uitloggen</button>
+  </header>
+
+  <div class="sectie">
+    <h2>📋 Leerlingen importeren</h2>
+    <p>Upload een CSV-bestand met twee kolommen: <strong>email</strong> en <strong>naam</strong>. Scheidingsteken: komma.</p>
+    
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('csv-input').click()">
+      <div class="upload-icon">📄</div>
+      <div class="upload-label">Klik om CSV te selecteren</div>
+      <div class="upload-hint">of sleep het bestand hierheen</div>
+      <input type="file" id="csv-input" accept=".csv" autocomplete="off">
+    </div>
+
+    <div class="preview" id="preview">
+      <div class="preview-titel">Voorbeeld (eerste 10 rijen)</div>
+      <div class="preview-tabel">
+        <table>
+          <thead>
+            <tr>
+              <th>E-mail</th>
+              <th>Naam</th>
+            </tr>
+          </thead>
+          <tbody id="preview-body"></tbody>
+        </table>
+      </div>
+      
+      <div class="knoppen-rij">
+        <button class="btn btn-primair" id="upload-btn" disabled>
+          Importeren naar Firebase
+        </button>
+        <button class="btn btn-secundair" onclick="annuleren()">
+          Annuleren
+        </button>
+      </div>
+    </div>
+
+    <div class="bericht" id="upload-bericht"></div>
+  </div>
+
+  <div class="sectie">
+    <h2>📊 Statistieken</h2>
+    <div class="stats-grid">
+      <div class="stat-kaart">
+        <div class="stat-getal" id="stat-leerlingen">—</div>
+        <div class="stat-label">Leerlingen</div>
+      </div>
+      <div class="stat-kaart">
+        <div class="stat-getal" id="stat-oefeningen">—</div>
+        <div class="stat-label">Totaal oefeningen</div>
+      </div>
+    </div>
+    <p style="font-size:0.82rem;color:var(--muted);margin:0">
+      Gedetailleerde rapporten komen in een volgende fase.
+    </p>
+  </div>
+
+</div>
+
+<script type="module">
+import { db } from './config.js';
+import { collection, doc, setDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+checkLogin();
+
+function checkLogin() {
+  const stored = localStorage.getItem('wiskunde_user');
+  if (!stored) {
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  try {
+    const user = JSON.parse(stored);
+    if (!user.isAdmin) {
+      window.location.href = 'index.html';
+      return;
+    }
+  } catch (e) {
+    localStorage.removeItem('wiskunde_user');
+    window.location.href = 'login.html';
+  }
+}
+
+window.uitloggen = function() {
+  localStorage.removeItem('wiskunde_user');
+  window.location.href = 'login.html';
+};
+
+let csvData = [];
+
+const uploadZone = document.getElementById('upload-zone');
+const csvInput = document.getElementById('csv-input');
+
+uploadZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadZone.classList.add('dragover');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+  uploadZone.classList.remove('dragover');
+});
+
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) verwerkCSV(file);
+});
+
+csvInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) verwerkCSV(file);
+});
+
+function verwerkCSV(file) {
+  const reader = new FileReader();
+  
+  reader.onload = (e) => {
+    try {
+      const tekst = e.target.result;
+      const regels = tekst.trim().split('\n');
+      
+      csvData = [];
+      for (let i = 1; i < regels.length; i++) {
+        const regel = regels[i].trim();
+        if (!regel) continue;
+        
+        const delen = regel.split(',');
+        if (delen.length < 2) continue;
+        
+        const email = delen[0].trim().toLowerCase();
+        const naam = delen.slice(1).join(',').trim();
+        
+        if (email && naam) {
+          csvData.push({ email, naam });
+        }
+      }
+      
+      if (csvData.length === 0) {
+        throw new Error('Geen geldige data gevonden in CSV');
+      }
+      
+      toonPreview();
+      
+    } catch (err) {
+      toonBericht('fout', `Fout bij lezen CSV: ${err.message}`);
+    }
+  };
+  
+  reader.readAsText(file);
+}
+
+function toonPreview() {
+  const preview = document.getElementById('preview');
+  const body = document.getElementById('preview-body');
+  const btn = document.getElementById('upload-btn');
+  
+  const eerste10 = csvData.slice(0, 10);
+  body.innerHTML = eerste10.map(item => `
+    <tr>
+      <td>${item.email}</td>
+      <td>${item.naam}</td>
+    </tr>
+  `).join('');
+  
+  preview.classList.add('actief');
+  btn.disabled = false;
+  btn.textContent = `Importeren (${csvData.length} leerlingen)`;
+}
+
+window.annuleren = function() {
+  document.getElementById('preview').classList.remove('actief');
+  document.getElementById('csv-input').value = '';
+  csvData = [];
+  verbergBericht();
+};
+
+document.getElementById('upload-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('upload-btn');
+  btn.disabled = true;
+  btn.textContent = 'Bezig met importeren...';
+  
+  toonBericht('info', `Leerlingen worden toegevoegd aan Firebase...`);
+  
+  try {
+    let succes = 0;
+    let fouten = 0;
+    
+    for (const leerling of csvData) {
+      try {
+        const docRef = doc(db, 'leerlingen', leerling.email);
+        await setDoc(docRef, {
+          naam: leerling.naam,
+          resultaten: []
+        }, { merge: true });
+        succes++;
+      } catch (err) {
+        console.error(`Fout bij ${leerling.email}:`, err);
+        fouten++;
+      }
+    }
+    
+    toonBericht('succes', `✓ Import voltooid: ${succes} succesvol, ${fouten} fouten.`);
+    annuleren();
+    laadStatistieken();
+    
+  } catch (err) {
+    console.error('Import fout:', err);
+    toonBericht('fout', `Fout bij importeren: ${err.message}`);
+    btn.disabled = false;
+    btn.textContent = `Importeren (${csvData.length} leerlingen)`;
+  }
+});
+
+function toonBericht(type, tekst) {
+  const el = document.getElementById('upload-bericht');
+  el.className = `bericht actief ${type}`;
+  el.textContent = tekst;
+}
+
+function verbergBericht() {
+  document.getElementById('upload-bericht').classList.remove('actief');
+}
+
+async function laadStatistieken() {
+  try {
+    const snapshot = await getDocs(collection(db, 'leerlingen'));
+    const aantalLeerlingen = snapshot.size;
+    
+    let totaalOefeningen = 0;
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.resultaten) {
+        totaalOefeningen += data.resultaten.length;
+      }
+    });
+    
+    document.getElementById('stat-leerlingen').textContent = aantalLeerlingen;
+    document.getElementById('stat-oefeningen').textContent = totaalOefeningen;
+    
+  } catch (err) {
+    console.error('Fout bij laden stats:', err);
+  }
+}
+
+laadStatistieken();
+</script>
+
+</body>
+</html>
