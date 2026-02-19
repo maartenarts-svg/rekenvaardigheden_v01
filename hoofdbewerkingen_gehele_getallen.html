@@ -590,7 +590,7 @@ function updateVoortgang() {
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('progress-tekst').textContent =
     huidigeIdx < TOTAAL ? `Oefening ${huidigeIdx + 1} van ${TOTAAL}` : `Klaar!`;
-  document.getElementById('score-live').textContent = `${punten} / ${huidigeIdx} pt`;
+  document.getElementById('score-live').textContent = `${punten} / ${huidigeIdx}`;
 }
 
 // ── Rekenregel bepalen ──
@@ -640,17 +640,17 @@ function toonOefening() {
     <div class="oefening-kaart" id="oef-kaart">
       <p class="opmerking">Druk op <strong>+</strong> voor een extra tussenstap als dat nodig is.</p>
       <p class="vraag-label">Bereken</p>
-      <p class="vraag-tekst" id="vraag-tekst">${oef.display} =</p>
+      <p class="vraag-tekst" id="vraag-tekst">${oef.display}</p>
 
       <div class="stap-rij" id="stap1-rij">
         <span class="equals">=</span>
-        <input class="invoer" id="invoer1" type="text" placeholder="?" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text">
+        <input class="invoer" id="invoer1" type="text" placeholder="" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text">
         <button class="toggle-stap" id="toggle-btn" title="Tussenstap tonen/verbergen">+</button>
       </div>
 
       <div class="stap-rij" id="stap2-rij" style="display:none">
         <span class="equals">=</span>
-        <input class="invoer" id="invoer2" type="text" placeholder="?" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text">
+        <input class="invoer" id="invoer2" type="text" placeholder="" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text">
       </div>
 
       <div class="knoppen-rij">
@@ -696,9 +696,53 @@ function toonOefening() {
   });
 
   volgendeBtn.addEventListener('click', () => {
-    huidigeIdx++;
     toonOefening();
   });
+}
+
+// ── Definitieve feedback (lvl306-stijl) ──
+function bepaalDefinitieveFeedback(oef, userNum) {
+  const result = oef.result;
+  const absResult = Math.abs(result);
+  const userAbs = Math.abs(userNum);
+  const correctSign = result < 0 ? 'negatief' : 'positief';
+  const userSign = userNum < 0 ? 'negatief' : 'positief';
+  const signFout = (result < 0) !== (userNum < 0);
+  const absFout = userAbs !== absResult;
+
+  let txt = `❌ Het juiste antwoord is <strong>${result}</strong>.<br>`;
+
+  if (oef.subType === 3) {
+    // Vermenigvuldigen / delen
+    const bewNaam = oef.isMult ? 'vermenigvuldiging' : 'deling';
+    const negTelling = oef.negTelling;
+    const evenOneven = negTelling % 2 === 0 ? 'even' : 'oneven';
+    const uitkomstTeken = negTelling % 2 === 0 ? 'positief' : 'negatief';
+
+    if (signFout && absFout) {
+      txt += `Het toestandsteken van de uitkomst is niet juist. Bij een ${bewNaam} tel je het aantal negatieve getallen. `;
+      txt += `Hier ${negTelling === 1 ? 'is er één' : `zijn er ${negTelling}`} negatief${negTelling === 1 ? '' : 'e'} getal${negTelling === 1 ? '' : 'len'}. `;
+      txt += `Dat is een ${evenOneven} aantal, dus de uitkomst is ${uitkomstTeken}.<br>`;
+      txt += `De absolute waarde van de uitkomst is ook niet juist. ${oef.isMult ? 'Vermenigvuldig' : 'Deel'} de absolute waardes van de getallen.`;
+    } else if (signFout) {
+      txt += `Het toestandsteken van de uitkomst is niet juist. Bij een ${bewNaam} tel je het aantal negatieve getallen. `;
+      txt += `Hier ${negTelling === 1 ? 'is er één' : `zijn er ${negTelling}`} negatief${negTelling === 1 ? '' : 'e'} getal${negTelling === 1 ? '' : 'len'}. `;
+      txt += `Dat is een ${evenOneven} aantal, dus de uitkomst is ${uitkomstTeken}.`;
+    } else if (absFout) {
+      txt += `De absolute waarde van de uitkomst is niet juist. ${oef.isMult ? 'Vermenigvuldig' : 'Deel'} de absolute waardes van de getallen.`;
+    }
+  } else {
+    // Optellen / aftrekken
+    if (signFout && absFout) {
+      txt += `Het toestandsteken van de uitkomst is niet juist. Bestudeer de pijlenvoorstelling goed: aan welke kant van 0 eindigt de bovenste pijl?<br>`;
+      txt += `De absolute waarde is ook niet juist. Controleer of je de pijllengtes juist hebt opgeteld of afgetrokken.`;
+    } else if (signFout) {
+      txt += `Het toestandsteken van de uitkomst is niet juist. Bestudeer de pijlenvoorstelling goed: aan welke kant van 0 eindigt de bovenste pijl?`;
+    } else if (absFout) {
+      txt += `De absolute waarde van de uitkomst is niet juist. Controleer of je de pijllengtes juist hebt opgeteld of afgetrokken.`;
+    }
+  }
+  return txt;
 }
 
 // ── Controleer antwoord ──
@@ -710,6 +754,7 @@ function controleer() {
   const rrBlok = document.getElementById('rekenregel-blok');
   const controleerBtn = document.getElementById('controleer-btn');
   const volgendeBtn = document.getElementById('volgende-btn');
+  const toggleBtn = document.getElementById('toggle-btn');
 
   let v1 = invoer1.value.trim();
   let v2 = invoer2.value.trim();
@@ -723,30 +768,20 @@ function controleer() {
   const heeft2 = v1 !== '' && v2 !== '';
   const antwoord = v2 !== '' ? v2 : v1;
 
-  // Verberg toggle & extra stap na eerste controle
-  document.getElementById('toggle-btn').style.display = 'none';
-  document.getElementById('stap2-rij').style.display = v2 !== '' ? 'flex' : 'none';
-
   const userNum = parseFloat(antwoord.replace(',', '.'));
   const correct = Number.isFinite(userNum) && userNum === oef.result;
 
-  // Tussenstap controle voor type 2
-  let tussenstapFout = false;
-  if (oef.needsRewrite && heeft2) {
-    const v1Norm = v1.replace(/\s/g,'');
-    const verwacht = oef.herschreven.replace(/\s/g,'');
-    tussenstapFout = (v1Norm !== verwacht);
-  }
-
   // ── GOED (eerste poging) ──
-  if (correct && pogingTeller === 0 && !tussenstapFout) {
+  if (correct && pogingTeller === 0) {
     invoer1.classList.add('correct');
     if (v2 !== '') invoer2.classList.add('correct');
     punten += 1;
     eerstePoging++;
+    huidigeIdx++; // teller direct ophogen
     fbBox.className = 'feedback-box succes';
     fbBox.innerHTML = '✅ Correct! Goed gedaan!';
     fbBox.style.display = 'block';
+    toggleBtn.style.display = 'none';
     controleerBtn.style.display = 'none';
     volgendeBtn.style.display = 'inline-block';
     invoer1.disabled = true; invoer2.disabled = true;
@@ -755,11 +790,12 @@ function controleer() {
   }
 
   // ── GOED (tweede poging) ──
-  if (correct && pogingTeller === 1 && !tussenstapFout) {
+  if (correct && pogingTeller === 1) {
     invoer1.classList.add('correct');
     if (v2 !== '') invoer2.classList.add('correct');
     punten += 0.5;
     tweedePoging++;
+    huidigeIdx++; // teller direct ophogen
     fbBox.className = 'feedback-box succes';
     fbBox.innerHTML = '✅ Correct bij de tweede poging!';
     fbBox.style.display = 'block';
@@ -771,9 +807,8 @@ function controleer() {
     return;
   }
 
-  // ── FOUT ──
+  // ── FOUT (eerste poging) ──
   if (pogingTeller === 0) {
-    // Eerste fout: toon rekenregel, laat opnieuw proberen
     invoer1.classList.add('fout');
     if (v2 !== '') invoer2.classList.add('fout');
 
@@ -784,7 +819,7 @@ function controleer() {
     rrBlok.innerHTML = bepaalRekenregel(oef);
     rrBlok.style.display = 'block';
 
-    // Reset invoervelden voor nieuwe poging
+    // Reset invoervelden na korte pauze
     setTimeout(() => {
       invoer1.classList.remove('fout');
       invoer2.classList.remove('fout');
@@ -792,20 +827,27 @@ function controleer() {
       invoer2.value = '';
       invoer1.disabled = false;
       invoer2.disabled = false;
+      invoer1.focus();
+      controleerBtn.disabled = true;
     }, 800);
 
     pogingTeller = 1;
-    controleerBtn.disabled = true;
+    // Toggle NIET verbergen zodat leerling nog tussenstap kan gebruiken
 
   } else {
-    // Tweede fout: definitief fout, toon correct antwoord
+    // ── FOUT (tweede poging) — definitief ──
     invoer1.classList.add('fout');
     if (v2 !== '') invoer2.classList.add('fout');
     foutGegaan++;
+    huidigeIdx++; // teller direct ophogen
+
+    // Verberg rekenregel en tijdelijk bericht, toon lvl306-stijl feedback
+    rrBlok.style.display = 'none';
     fbBox.className = 'feedback-box fout-definitief';
-    fbBox.innerHTML = `❌ Het juiste antwoord is <strong>${oef.result}</strong>.`;
+    fbBox.innerHTML = bepaalDefinitieveFeedback(oef, Number.isFinite(userNum) ? userNum : 0);
     fbBox.style.display = 'block';
-    rrBlok.style.display = 'block';
+
+    toggleBtn.style.display = 'none';
     controleerBtn.style.display = 'none';
     volgendeBtn.style.display = 'inline-block';
     invoer1.disabled = true; invoer2.disabled = true;
