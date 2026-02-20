@@ -354,6 +354,7 @@ document.addEventListener('keydown',e=>{
       }
       if(e.key==='*'){
         e.preventDefault();
+        e.stopPropagation();
         invoegMaal(ti);
         syncStapData(stapIdx,obj);updateCtrlKnop();
         return;
@@ -373,6 +374,7 @@ document.addEventListener('keydown',e=>{
       }
       if(e.key==='*'){
         e.preventDefault();
+        e.stopPropagation();
         invoegMaal(ni);
         syncStapData(stapIdx,obj);updateCtrlKnop();
         return;
@@ -517,6 +519,7 @@ function voegBreukToe(stapIdx,obj,bufWaarde){
     }
     if(e2.key==='*'){
       e2.preventDefault();
+      e2.stopPropagation();
       invoegMaal(ti);
       syncStapData(stapIdx,obj);updateCtrlKnop();
     }
@@ -532,6 +535,7 @@ function voegBreukToe(stapIdx,obj,bufWaarde){
     if(e2.key==='ArrowRight'){e2.preventDefault();verlaatveld(obj);}
     if(e2.key==='*'){
       e2.preventDefault();
+      e2.stopPropagation();
       invoegMaal(ni);
       syncStapData(stapIdx,obj);updateCtrlKnop();
     }
@@ -614,7 +618,8 @@ function parseStap(stap){
 
   // Enkelvoudige breuk
   if(fracs.length===1&&maals.length===0){
-    return parseFracToken(fracs[0]);
+    const r=parseFracToken(fracs[0]);
+    return r;
   }
 
   // Product van twee breuken
@@ -636,7 +641,9 @@ function parseFracToken(tok){
   const t=evalExpr(tStr);
   const n=evalExpr(nStr);
   if(t===null||n===null||n===0)return null;
-  return{soort:'breuk',t:teken*t,n};
+  // Vlag: staat er nog een · in de teller of noemer? Dan nog niet volledig uitgerekend.
+  const heeftProduct=tStr.includes('·')||nStr.includes('·');
+  return{soort:'breuk',t:teken*t,n,heeftProduct};
 }
 
 function updateCtrlKnop(){
@@ -686,6 +693,8 @@ function valideerAntwoord(parsed,corrRes,corrIsGeheel){
 
   // Breuk
   if(parsed.soort==='breuk'){
+    // Als teller of noemer nog een · bevat: nog niet uitgerekend
+    if(parsed.heeftProduct)return{ok:false,reden:'nogBewerking'};
     if(!breukGelijk(parsed.t,parsed.n,corrRes.t,corrRes.n))return{ok:false,reden:'fout'};
     const g=gcd(Math.abs(parsed.t),Math.abs(parsed.n));
     if(g>1)return{ok:false,reden:'nogVereenvoudigen'};
