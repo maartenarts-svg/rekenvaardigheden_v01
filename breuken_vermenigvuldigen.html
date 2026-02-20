@@ -417,8 +417,10 @@ document.addEventListener('keydown',e=>{
     return;
   }
 
-  // Maalteken: alleen na een complete breuk
+  // Maalteken: alleen na een complete breuk, en NIET als een input focus heeft
   if(e.key==='*'){
+    // Als een input-element actief is, laat de input's eigen keydown het afhandelen
+    if(document.activeElement&&document.activeElement.tagName==='INPUT') return;
     e.preventDefault();
     const last=obj.tokens[obj.tokens.length-1];
     if(last&&last.type==='frac'){
@@ -443,8 +445,10 @@ document.addEventListener('keydown',e=>{
 
 function invoegMaal(input){
   const p=input.selectionStart;
-  input.value=input.value.slice(0,p)+MAAL+input.value.slice(input.selectionEnd);
-  input.setSelectionRange(p+1,p+1);
+  // Voeg spaties toe rond het maalteken voor leesbaarheid
+  const ins=' '+MAAL+' ';
+  input.value=input.value.slice(0,p)+ins+input.value.slice(input.selectionEnd);
+  input.setSelectionRange(p+ins.length,p+ins.length);
 }
 
 function renderBuf(obj){
