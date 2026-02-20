@@ -24,7 +24,7 @@ const OEFENINGEN = [
   {
     type: 1,
     naam: "Hoofdbewerkingen met gehele getallen",
-    beschrijving: "Bereken som, verschil, product en quotiënt van gehele getallen",
+    beschrijving: "Bereken som, verschil, product en quotiënt van gehele getallen.",
     url: "hoofdbewerkingen_gehele_getallen.html",
     kleur: "#4A90D9",
     icon: "🧮"
@@ -32,7 +32,7 @@ const OEFENINGEN = [
   {
     type: 2,
     naam: "Breuken gelijknamig maken",
-    beschrijving: "Bereken som, verschil, product en quotiënt van gehele getallen",
+    beschrijving: "Maak twee breuken gelijknamig.",
     url: "breuken_gelijknamig_maken.html",
     kleur: "#4A90D9",
     icon: "🧩"
@@ -40,7 +40,7 @@ const OEFENINGEN = [
   {
     type: 3,
     naam: "Breuken optellen & aftrekken",
-    beschrijving: "Tel en trek breuken op met gelijke en ongelijke noemers",
+    beschrijving: "Tel ongelijknamige breuken op of trek ze af.",
     url: "breuken_optellen_en_aftrekken.html",
     kleur: "#4A90D9",
     icon: "➕➖"
@@ -48,15 +48,15 @@ const OEFENINGEN = [
   {
     type: 4,
     naam: "Breuken vermenigvuldigen",
-    beschrijving: "Vermenigvuldig twee of meer breuken",
-    url: "oefening_breuken_vermenigvuldigen.html",
+    beschrijving: "Vermenigvuldig twee breuken.",
+    url: "breuken_vermenigvuldigen.html",
     kleur: "#E8A838",
     icon: "✖️"
   },
   {
     type: 5,
     naam: "Breuken delen",
-    beschrijving: "Deel breuken door elkaar",
+    beschrijving: "Deel breuken door elkaar.",
     url: "oefening_breuken_delen.html",
     kleur: "#5CB85C",
     icon: "➗"
@@ -64,7 +64,7 @@ const OEFENINGEN = [
   {
     type: 6,
     naam: "Macht van een breuk",
-    beschrijving: "Bereken machten van breuken",
+    beschrijving: "Bereken machten van breuken.",
     url: "oefening_macht_breuk.html",
     kleur: "#9B59B6",
     icon: "💥"
@@ -72,7 +72,7 @@ const OEFENINGEN = [
   {
     type: 7,
     naam: "Volgorde van bewerkingen",
-    beschrijving: "Pas de juiste volgorde van bewerkingen toe",
+    beschrijving: "Pas de volgorde van de bewerkingen toe.",
     url: "oefening_volgorde.html",
     kleur: "#E74C3C",
     icon: "🪜"
