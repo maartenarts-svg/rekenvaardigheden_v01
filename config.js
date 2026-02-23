@@ -52,30 +52,6 @@ const OEFENINGEN = [
     url: "breuken_vermenigvuldigen.html",
     kleur: "#E8A838",
     icon: "✖️"
-  },
-  {
-    type: 5,
-    naam: "Breuken delen",
-    beschrijving: "Deel breuken door elkaar.",
-    url: "oefening_breuken_delen.html",
-    kleur: "#5CB85C",
-    icon: "➗"
-  },
-  {
-    type: 6,
-    naam: "Macht van een breuk",
-    beschrijving: "Bereken machten van breuken.",
-    url: "oefening_macht_breuk.html",
-    kleur: "#9B59B6",
-    icon: "💥"
-  },
-  {
-    type: 7,
-    naam: "Volgorde van bewerkingen",
-    beschrijving: "Pas de volgorde van de bewerkingen toe.",
-    url: "oefening_volgorde.html",
-    kleur: "#E74C3C",
-    icon: "🪜"
   }
 ];
 
