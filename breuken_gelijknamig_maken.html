@@ -36,7 +36,7 @@
 
     .oefening-kaart { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; animation: fadeIn .3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .vraag-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-bottom: 20px; display: block; }
+    .vraag-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-bottom: 10px; display: block; }
 
     /* ── OPGAVE: twee kolommen met verticale streep ── */
     .opgave-grid {
@@ -143,6 +143,17 @@
 
     .b-inline { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; font-size: .9em; font-weight: 800; line-height: 1; margin: 0 4px; }
     .b-inline .bi-streep { width: 100%; min-width: 20px; height: 2px; background: currentColor; margin: 1px 0; }
+
+    .opmerking {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 20px;
+      padding: 10px 14px;
+      border-left: 3px solid var(--accent);
+      background: rgba(91,141,238,0.07);
+      border-radius: 0 8px 8px 0;
+    }
 
     @media (max-width: 600px) {
       .opgave-grid { grid-template-columns: 1fr; }
@@ -488,6 +499,13 @@ function toonOefening() {
   const lbl=document.createElement('span'); lbl.className='vraag-label'; lbl.textContent='Maak gelijknamig';
   kaart.appendChild(lbl);
 
+  // Info-tekst
+  const info = document.createElement('p');
+  info.className = 'opmerking';
+  info.textContent = 'Druk op + voor een extra tussenstap als dat nodig is.\nGebruik / om een breuk in te voeren.';
+  info.style.whiteSpace = 'pre-line';
+  kaart.appendChild(info);
+
   // Opgave grid
   const og=document.createElement('div'); og.className='opgave-grid';
   const oc1=document.createElement('div'); oc1.className='opgave-cel'; oc1.innerHTML=breukDisp(oef.b1.t,oef.b1.n);
@@ -513,12 +531,6 @@ function toonOefening() {
 
   const fb=document.createElement('div'); fb.className='feedback-box'; fb.id='feedback-box'; kaart.appendChild(fb);
   const rr=document.createElement('div'); rr.className='rekenregel-blok'; rr.id='rr-blok'; kaart.appendChild(rr);
-
-  // Info-tekst
-  const info=document.createElement('p');
-  info.style.cssText='font-size:.78rem;color:var(--muted);margin-top:10px;margin-bottom:0;';
-  info.textContent='Druk op + voor een extra tussenstap als dat nodig is.';
-  kaart.appendChild(info);
 
   ih.appendChild(kaart);
   cb.addEventListener('click', controleer);

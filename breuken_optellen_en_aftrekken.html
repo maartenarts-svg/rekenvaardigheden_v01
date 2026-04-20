@@ -37,7 +37,7 @@
     /* KAART */
     .oefening-kaart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;animation:fadeIn .3s ease;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-    .vraag-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:20px;display:block;}
+    .vraag-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:10px;display:block;}
 
     /* OPGAVE */
     .opgave-box{
@@ -162,6 +162,17 @@
     .b-inline .bi-streep{width:100%;min-width:18px;height:2px;background:currentColor;margin:1px 0;}
 
     .info-tekst{font-size:.78rem;color:var(--muted);margin-top:10px;}
+
+    .opmerking {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 20px;
+      padding: 10px 14px;
+      border-left: 3px solid var(--accent);
+      background: rgba(91,141,238,0.07);
+      border-radius: 0 8px 8px 0;
+    }
   </style>
 </head>
 <body>
@@ -690,6 +701,13 @@ function toonOefening(){
   const lbl=document.createElement('span');lbl.className='vraag-label';lbl.textContent='Bereken';
   kaart.appendChild(lbl);
 
+  // Info-tekst
+  const info = document.createElement('p');
+  info.className = 'opmerking';
+  info.textContent = 'Druk op + voor een extra tussenstap als dat nodig is.\nGebruik / om een breuk in te voeren.';
+  info.style.whiteSpace = 'pre-line';
+  kaart.appendChild(info);
+
   // Opgave
   const opgBox=document.createElement('div');opgBox.className='opgave-box';
   // Eerste term
@@ -713,11 +731,6 @@ function toonOefening(){
   voegStapToe(kolom,oef);
 
   kaart.appendChild(kolom);
-
-  // Info tekst
-  const info=document.createElement('p');info.className='info-tekst';
-  info.textContent='Druk op + voor een extra tussenstap als dat nodig is.';
-  kaart.appendChild(info);
 
   // Knoppen
   const kr=document.createElement('div');kr.className='knoppen-rij';
