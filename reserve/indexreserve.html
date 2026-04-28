@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <!-- ============================================================
- index.html — Controlepaneel leerling
+ Dashboard.html
 ============================================================ -->
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wiskunde Oefenplatform</title>
+  <title>Controlepaneel — Wiskunde</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -190,7 +190,7 @@
       line-height: 1.6;
     }
 
-    /* ── SECTIE TITEL ── */
+    /* ── OEFENINGEN GRID ── */
     .sectie-titel {
       font-size: 0.75rem;
       font-weight: 700;
@@ -210,7 +210,6 @@
       background: var(--border);
     }
 
-    /* ── OEFENINGEN GRID ── */
     .oefeningen-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -241,7 +240,9 @@
     .oefening-kaart::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       height: 3px;
       background: var(--kaart-kleur, var(--accent));
       opacity: 0.7;
@@ -254,7 +255,9 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     }
 
-    .oefening-kaart:hover::before { opacity: 1; }
+    .oefening-kaart:hover::before {
+      opacity: 1;
+    }
 
     .kaart-icon {
       width: 42px;
@@ -281,50 +284,6 @@
       line-height: 1.5;
     }
 
-    /* ── GEEN OEFENINGEN MELDING ── */
-    .geen-oefeningen {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 48px 32px;
-      text-align: center;
-      animation: fadeIn 0.35s ease both;
-    }
-
-    .geen-oefeningen .groot-icon {
-      font-size: 3rem;
-      margin-bottom: 16px;
-    }
-
-    .geen-oefeningen p {
-      color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
-
-    .geen-oefeningen strong {
-      color: var(--text);
-    }
-
-    /* ── LOADING ── */
-    .loading {
-      text-align: center;
-      padding: 80px 0;
-      color: var(--muted);
-    }
-
-    .spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
     footer {
       display: flex;
       align-items: center;
@@ -340,8 +299,12 @@
     }
 
     @media (max-width: 600px) {
-      .intro h2 { font-size: 1.5rem; }
-      .oefeningen-grid { grid-template-columns: 1fr; }
+      .intro h2 {
+        font-size: 1.5rem;
+      }
+      .oefeningen-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -376,11 +339,8 @@
 
   <p class="sectie-titel">Beschikbare oefeningen</p>
 
-  <div id="oefeningen-container">
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Oefeningen laden...</p>
-    </div>
+  <div class="oefeningen-grid" id="oefeningen-container">
+    <!-- Wordt dynamisch gevuld via config.js -->
   </div>
 
   <footer>
@@ -390,28 +350,32 @@
 </div>
 
 <script type="module">
-import { db, OEFENINGEN } from './config.js';
-import { doc, getDoc, getDocs, collection } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { OEFENINGEN } from './config.js';
 
-// ── Check login ──
+// ── Check login status ──
 const user = checkLogin();
 
+// ── Gebruiker UI ──
 function checkLogin() {
   const stored = localStorage.getItem('wiskunde_user');
   if (!stored) {
     window.location.href = 'login.html';
     return null;
   }
+  
   try {
     const user = JSON.parse(stored);
     if (user.isAdmin) {
       window.location.href = 'dashboard.html';
       return null;
     }
+    
+    // Toon gebruiker
     const naam = user.naam || user.email;
     const initiaal = naam.charAt(0).toUpperCase();
     document.getElementById('user-name').textContent = naam;
     document.getElementById('user-avatar').textContent = initiaal;
+    
     return user;
   } catch (e) {
     localStorage.removeItem('wiskunde_user');
@@ -426,87 +390,28 @@ window.uitloggen = function() {
   window.location.href = 'login.html';
 };
 
-// ── Oefeningen ophalen en tonen ──
-async function init() {
-  if (!user) return;
-
-  try {
-    // Haal leerlingdata op uit Firestore
-    const leerlingSnap = await getDoc(doc(db, 'leerlingen', user.email));
-
-    if (!leerlingSnap.exists()) {
-      toonGeenOefeningen();
-      return;
-    }
-
-    const leerlingData = leerlingSnap.data();
-    const groepIds = leerlingData.groepen || [];
-
-    if (groepIds.length === 0) {
-      toonGeenOefeningen();
-      return;
-    }
-
-    // Haal alle groepen op en verzamel de oefentypes (unie)
-    const beschikbareTypes = new Set();
-
-    for (const groepId of groepIds) {
-      const groepSnap = await getDoc(doc(db, 'groepen', groepId));
-      if (groepSnap.exists()) {
-        const oefeningen = groepSnap.data().oefeningen || [];
-        oefeningen.forEach(type => beschikbareTypes.add(type));
-      }
-    }
-
-    if (beschikbareTypes.size === 0) {
-      toonGeenOefeningen();
-      return;
-    }
-
-    // Filter OEFENINGEN op beschikbare types, bewaar volgorde uit config
-    const teBaren = OEFENINGEN.filter(oef => beschikbareTypes.has(oef.type));
-    renderOefeningen(teBaren);
-
-  } catch (err) {
-    console.error('Fout bij laden oefeningen:', err);
-    toonGeenOefeningen();
-  }
-}
-
-function renderOefeningen(oefeningen) {
+// ── Oefeningen tonen ──
+function renderOefeningen() {
   const container = document.getElementById('oefeningen-container');
-  const grid = document.createElement('div');
-  grid.className = 'oefeningen-grid';
-
-  oefeningen.forEach((oef, idx) => {
+  
+  OEFENINGEN.forEach((oef, idx) => {
     const kaart = document.createElement('a');
     kaart.className = 'oefening-kaart';
     kaart.href = oef.url;
     kaart.style.setProperty('--kaart-kleur', oef.kleur);
     kaart.style.animationDelay = `${idx * 0.07}s`;
+    
     kaart.innerHTML = `
       <div class="kaart-icon">${oef.icon}</div>
       <div class="kaart-label">${oef.naam}</div>
       <div class="kaart-beschrijving">${oef.beschrijving}</div>
     `;
-    grid.appendChild(kaart);
+    
+    container.appendChild(kaart);
   });
-
-  container.innerHTML = '';
-  container.appendChild(grid);
 }
 
-function toonGeenOefeningen() {
-  document.getElementById('oefeningen-container').innerHTML = `
-    <div class="geen-oefeningen">
-      <div class="groot-icon">📭</div>
-      <p><strong>Er zijn nog geen oefeningen beschikbaar.</strong></p>
-      <p>Neem contact op met je coach.</p>
-    </div>
-  `;
-}
-
-init();
+renderOefeningen();
 </script>
 
 </body>

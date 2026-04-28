@@ -14,7 +14,7 @@ const firebaseConfig = {
 };
 
 // ── ADMIN INSTELLINGEN ──
-const ADMIN_EMAIL = "maarten.arts@labsintniklaas.be";
+const ADMIN_EMAIL = "beheerder.wiskunde@labsintniklaas.be";
 const ADMIN_CODE = "852874179639";
 
 // ── OEFENINGEN CONFIGURATIE ──
@@ -52,7 +52,15 @@ const OEFENINGEN = [
     url: "breuken_vermenigvuldigen.html",
     kleur: "#E8A838",
     icon: "✖️"
-  }
+  },  
+  {
+    type: 5,
+    naam: "Breuken delen",
+    beschrijving: "Deel breuken door elkaar.",
+    url: "breuken_delen.html",
+    kleur: "#5CB85C",
+    icon: "➗"
+  },
 ];
 
 // ── FIREBASE INITIALISATIE ──

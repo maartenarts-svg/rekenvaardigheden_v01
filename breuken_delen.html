@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <!-- ============================================================
- breuken_vermenigvuldigen.html
+ breuken_delen.html
 ============================================================ -->
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Breuken vermenigvuldigen – Wiskunde Oefenplatform</title>
+  <title>Breuken delen – Wiskunde Oefenplatform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -123,7 +123,7 @@
   <header>
     <a href="index.html" class="back-btn">← Terug naar oefeningen</a>
     <div class="page-title">
-      <h1>✖️ Breuken vermenigvuldigen</h1>
+      <h1>➗ Breuken delen</h1>
       <span id="user-label">Laden...</span>
     </div>
   </header>
@@ -141,8 +141,9 @@
 import { db } from './config.js';
 import { doc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-const TOTAAL=6, TYPE_NR=4;
+const TOTAAL=6, TYPE_NR=5;
 const MAAL='\u00b7';
+const DEEL=':';
 
 let user=null,opgaven=[],huidigeIdx=0;
 let punten=0,eerstePoging=0,tweedePoging=0,foutGegaan=0,pogingTeller=0;
@@ -160,7 +161,21 @@ function reduceer(t,n){
   if(rn<0){rt=-rt;rn=-rn;}
   return{t:rt,n:rn};
 }
-function berekenProduct(t1,n1,t2,n2){return reduceer(t1*t2,n1*n2);}
+
+// Voor deling: a/b : c/d = a/b * d/c
+// Geeft het correcte resultaat van de deling als gereduceerde breuk
+function berekenDeling(t1,n1,t2,n2){
+  // t1/n1 : t2/n2 = t1/n1 * n2/t2
+  return reduceer(t1*n2, n1*t2);
+}
+
+// Het omgekeerde van t/n is n/t
+function omgekeerde(t,n){
+  // Zorg dat noemer positief blijft
+  if(t<0)return{t:-n,n:-t};
+  return{t:n,n:t};
+}
+
 function breukGelijk(t1,n1,t2,n2){return t1*n2===t2*n1;}
 
 // Evalueer uitdrukking met getallen en · (bv "2·7" → 14)
@@ -186,7 +201,12 @@ function checkLogin(){
   }catch(e){localStorage.removeItem('wiskunde_user');window.location.href='login.html';return null;}
 }
 
-/* ── GENEREREN ── */
+/* ── GENEREREN ──
+   Zelfde 6 types als vermenigvuldigen, maar b2 wordt de deler.
+   De "correcte uitkomst" is t1/n1 : t2/n2.
+   Voor de validatie van tussenstappen: een tussenstap is correct als
+   hij wiskundig gelijkwaardig is aan de einduitkomst.
+*/
 const NOEMERS=[2,3,4,5,6,7,8,9,10,15,20];
 
 function irreducibel(negGaranteed=false){
@@ -196,13 +216,17 @@ function irreducibel(negGaranteed=false){
   return{t,n};
 }
 
+// Type 1 & 2: twee breuken, deling geeft onmiddellijk irreducibel resultaat
 function paarOnmiddellijk(neg1=false,neg2=false){
   for(let i=0;i<500;i++){
     const b1=irreducibel(false),b2=irreducibel(false);
     if(b1.n===b2.n)continue;
-    if(gcd(b1.t,b2.n)!==1)continue;
-    if(gcd(b2.t,b1.n)!==1)continue;
-    if(Math.abs(b1.t*b2.t)>100)continue;
+    if(b2.t===0)continue;
+    // t1*b2.n en n1*b2.t
+    const resT=b1.t*b2.n, resN=b1.n*b2.t;
+    if(resN===0)continue;
+    if(gcd(Math.abs(resT),Math.abs(resN))!==1)continue;
+    if(Math.abs(resT)>100)continue;
     if(neg1)b1.t=-b1.t;
     if(neg2)b2.t=-b2.t;
     return{b1,b2};
@@ -210,13 +234,16 @@ function paarOnmiddellijk(neg1=false,neg2=false){
   return{b1:{t:1,n:2},b2:{t:1,n:3}};
 }
 
+// Type 3 & 4: deling waarbij het resultaat nog vereenvoudigd moet worden
 function paarVereenvoudigbaar(neg1=false,neg2=false){
   for(let i=0;i<500;i++){
     const b1=irreducibel(false),b2=irreducibel(false);
     if(b1.n===b2.n)continue;
-    const pt=b1.t*b2.t,pn=b1.n*b2.n;
-    if(gcd(pt,pn)<=1)continue;
-    if(Math.abs(pt)>100)continue;
+    if(b2.t===0)continue;
+    const resT=b1.t*b2.n, resN=b1.n*b2.t;
+    if(resN===0)continue;
+    if(gcd(Math.abs(resT),Math.abs(resN))<=1)continue;
+    if(Math.abs(resT)>100)continue;
     if(neg1)b1.t=-b1.t;
     if(neg2)b2.t=-b2.t;
     return{b1,b2};
@@ -224,20 +251,22 @@ function paarVereenvoudigbaar(neg1=false,neg2=false){
   return{b1:{t:2,n:3},b2:{t:3,n:4}};
 }
 
-function paarMaalGeheel(deelbaar){
+// Type 5 & 6: breuk gedeeld door (of gedeeld op) een geheel getal
+function paarDeelGeheel(deelbaar){
   for(let i=0;i<500;i++){
     const b=irreducibel(Math.random()<.4);
     let g=rand(2,10);
     if(Math.random()<.5)g=-g;
     if(g===0)continue;
-    const d=gcd(b.n,Math.abs(g));
+    // We plaatsen het gehele getal altijd als deler (b2), net als bij vermenigvuldigen
+    // b1 / g → b1.t / (b1.n * g) → omgekeerde van g is 1/g
+    // deelbaar: gcd(b.t, |g|) > 1 (zodat het resultaat vereenvoudigbaar is)
+    const d=gcd(Math.abs(b.t),Math.abs(g));
     if(deelbaar&&d<=1)continue;
     if(!deelbaar&&d>1)continue;
-    if(Math.abs(b.t*g)>100)continue;
-    const breukEerst=Math.random()<.5;
-    return breukEerst
-      ?{b1:b,b2:{t:g,n:1},geheel:true,geheelPos:2}
-      :{b1:{t:g,n:1},b2:b,geheel:true,geheelPos:1};
+    if(Math.abs(b.t)>100)continue;
+    // Geheel getal als b2 met n=1
+    return{b1:b,b2:{t:g,n:1},geheel:true,geheelPos:2};
   }
   return{b1:{t:1,n:3},b2:{t:2,n:1},geheel:true,geheelPos:2};
 }
@@ -250,8 +279,8 @@ function genereerOpgaven(){
   L.push({...paarVereenvoudigbaar(false,false),nr:3});
   const n4a=Math.random()<.5,n4b=!n4a||Math.random()<.5;
   L.push({...paarVereenvoudigbaar(n4a,n4b&&n4a?true:!n4a),nr:4});
-  L.push({...paarMaalGeheel(false),nr:5});
-  L.push({...paarMaalGeheel(true),nr:6});
+  L.push({...paarDeelGeheel(false),nr:5});
+  L.push({...paarDeelGeheel(true),nr:6});
   return L;
 }
 
@@ -279,20 +308,7 @@ function uitwBreuk(t,n){
 }
 
 /* ════════════════════════════════════════
-   INVOER SYSTEEM
-   
-   Elke stap heeft een token-lijst:
-     {type:'buf', tekst, el}     ← getal/teken dat getypt wordt (buffer)
-     {type:'frac', teken, ti, ni, fracDiv, el}  ← complete breuk
-     {type:'maal', el}           ← · teken tussen twee breuken
-   
-   De cursor (iv-buf span) staat altijd aan het einde.
-   
-   Invoer-flows:
-   A) Cijfer → buffer groeit → '/' → breuk aangemaakt met buffer als teller
-   B) '-' → buffer='-' → '/' → breuk aangemaakt met teken '-'
-   C) '/' direct → lege breuk (teller leeg)
-   D) Na breuk: '*' → maalteken → dan flow A/B/C opnieuw
+   INVOER SYSTEEM (identiek aan vermenigvuldigen)
 ════════════════════════════════════════ */
 
 function maakStapObj(stapIdx){
@@ -300,17 +316,16 @@ function maakStapObj(stapIdx){
   wrap.className='iv-wrap';
   wrap.dataset.idx=stapIdx;
 
-  // De buffer-cursor staat altijd als laatste in de wrap
   const bufEl=document.createElement('span');
   bufEl.className='iv-buf';
   wrap.appendChild(bufEl);
 
   const obj={
-    tokens:[],       // {type, el, ...}
-    bufTekst:'',     // wat in de buffer staat (getal of teken)
+    tokens:[],
+    bufTekst:'',
     bufEl,
     wrap,
-    actieveFracEl:null,  // de fracDiv waarvan een input focus heeft
+    actieveFracEl:null,
     rij:null,plusBtn:null
   };
 
@@ -346,13 +361,11 @@ document.addEventListener('mousedown',e=>{
   }
 });
 
-/* ── KEYBOARD ── */
 document.addEventListener('keydown',e=>{
   if(!actief)return;
   const{stapIdx,obj}=actief;
   if(obj.wrap.classList.contains('disabled'))return;
 
-  // === IN EEN FRACTIEINPUT ===
   if(obj.actieveFracEl){
     const fracDiv=obj.actieveFracEl;
     const ti=fracDiv.querySelector('input[data-deel="teller"]');
@@ -362,7 +375,6 @@ document.addEventListener('keydown',e=>{
     if(focused===ti){
       if(e.key==='Backspace'&&ti.value===''){
         e.preventDefault();
-        // Als de teller leeg is en backspace: verwijder de breuk
         verwijderLaatsteToken(stapIdx,obj);
         return;
       }
@@ -373,7 +385,7 @@ document.addEventListener('keydown',e=>{
         syncStapData(stapIdx,obj);updateCtrlKnop();
         return;
       }
-      return; // rest native
+      return;
     }
     if(focused===ni){
       if(e.key==='Backspace'&&ni.value===''){
@@ -398,9 +410,6 @@ document.addEventListener('keydown',e=>{
     return;
   }
 
-  // === BUFFER FASE ===
-
-  // Cijfers
   if(e.key.match(/^[0-9]$/)){
     e.preventDefault();
     obj.bufTekst+=e.key;
@@ -409,11 +418,8 @@ document.addEventListener('keydown',e=>{
     return;
   }
 
-  // Minteken of plusteken als toestandsteken (enkel als buffer leeg)
   if((e.key==='-'||e.key==='+')&&obj.bufTekst===''){
-    // Alleen als er nog geen breuk/maal token is NA het laatste maal-token
     const last=obj.tokens[obj.tokens.length-1];
-    // Teken mag enkel vóór de allereerste breuk, of net na een maal-token
     if(!last||last.type==='maal'){
       e.preventDefault();
       obj.bufTekst=e.key;
@@ -423,19 +429,16 @@ document.addEventListener('keydown',e=>{
     return;
   }
 
-  // Breukstreep: maak breuk aan
   if(e.key==='/'){
     e.preventDefault();
-    const bufWaarde=obj.bufTekst; // kan '', '-', '+', of een getal zijn
+    const bufWaarde=obj.bufTekst;
     obj.bufTekst='';
     renderBuf(obj);
     voegBreukToe(stapIdx,obj,bufWaarde);
     return;
   }
 
-  // Maalteken: alleen na een complete breuk, en NIET als een input focus heeft
   if(e.key==='*'){
-    // Als een input-element actief is, laat de input's eigen keydown het afhandelen
     if(document.activeElement&&document.activeElement.tagName==='INPUT') return;
     e.preventDefault();
     const last=obj.tokens[obj.tokens.length-1];
@@ -445,7 +448,6 @@ document.addEventListener('keydown',e=>{
     return;
   }
 
-  // Backspace
   if(e.key==='Backspace'){
     e.preventDefault();
     if(obj.bufTekst){
@@ -461,7 +463,6 @@ document.addEventListener('keydown',e=>{
 
 function invoegMaal(input){
   const p=input.selectionStart;
-  // Voeg spaties toe rond het maalteken voor leesbaarheid
   const ins=' '+MAAL+' ';
   input.value=input.value.slice(0,p)+ins+input.value.slice(input.selectionEnd);
   input.setSelectionRange(p+ins.length,p+ins.length);
@@ -481,7 +482,6 @@ function verlaatveld(obj){
 }
 
 function voegBreukToe(stapIdx,obj,bufWaarde){
-  // bufWaarde: '' (lege teller via /), '-'/'+' (toestandsteken), of getal-string
   const fracDiv=document.createElement('div');
   fracDiv.className='iv-frac';
 
@@ -499,13 +499,12 @@ function voegBreukToe(stapIdx,obj,bufWaarde){
 
   fracDiv.appendChild(ti);fracDiv.appendChild(sd);fracDiv.appendChild(ni);
 
-  // Zet teller voor op basis van bufWaarde
   let voorTeken='';
   if(bufWaarde==='-'||bufWaarde==='+'){
     voorTeken=bufWaarde;
     ti.value='';
   } else if(bufWaarde!==''){
-    ti.value=bufWaarde; // getal rechtstreeks in teller
+    ti.value=bufWaarde;
   }
 
   obj.wrap.insertBefore(fracDiv,obj.bufEl);
@@ -514,10 +513,9 @@ function voegBreukToe(stapIdx,obj,bufWaarde){
   obj.tokens.push(token);
   setActieveFrac(obj,fracDiv);
 
-  // Teken-span vóór de fracDiv (als er een is)
   if(voorTeken){
     const tekenSpan=document.createElement('span');
-    tekenSpan.className='iv-maal'; // hergebruik stijl
+    tekenSpan.className='iv-maal';
     tekenSpan.style.padding='0 2px';
     tekenSpan.textContent=voorTeken;
     fracDiv.before(tekenSpan);
@@ -555,7 +553,6 @@ function voegBreukToe(stapIdx,obj,bufWaarde){
     }
   });
 
-  // Focus naar teller als leeg, noemer als teller al gevuld
   if(ti.value==='')ti.focus();
   else ni.focus();
 
@@ -575,18 +572,14 @@ function voegMaalToe(stapIdx,obj){
 function verwijderLaatsteToken(stapIdx,obj){
   if(!obj.tokens.length)return;
   const last=obj.tokens[obj.tokens.length-1];
-  // Verwijder ook het teken-span als het een frac is
   if(last.type==='frac'&&last.tekenEl)last.tekenEl.remove();
   last.el.remove();
   obj.tokens.pop();
   if(last.type==='frac')setActieveFrac(obj,null);
-  // Als het vorige token een maal was, verwijder die ook automatisch
-  // (zodat na backspace de cursor terug bij de vorige breuk staat)
   const prev=obj.tokens[obj.tokens.length-1];
   if(last.type==='frac'&&prev&&prev.type==='maal'){
     prev.el.remove();
     obj.tokens.pop();
-    // Zet focus naar noemer van nieuwe laatste token (frac)
     const newLast=obj.tokens[obj.tokens.length-1];
     if(newLast&&newLast.type==='frac'){
       setActieveFrac(obj,newLast.fracDiv);
@@ -603,19 +596,12 @@ function syncStapData(stapIdx,obj){
   stappen[stapIdx].bufTekst=obj.bufTekst;
 }
 
-/* ── PARSE STAP ──
-   Leest tokens en bufTekst, geeft één van:
-   {soort:'breuk', t, n}         enkelvoudige breuk (of geheel getal: n=1)
-   {soort:'product', t1,n1,t2,n2}  twee breuken met maal ertussen
-   {soort:'geheel', waarde}      enkel getal in buffer, geen /
-   null
-*/
+/* ── PARSE STAP ── */
 function parseStap(stap){
   if(!stap)return null;
   const tokens=stap.tokens||[];
   const buf=stap.bufTekst||'';
 
-  // Alleen buffer: geheel getal
   if(tokens.length===0){
     if(buf&&buf!=='-'&&buf!=='+'){
       const v=parseInt(buf);
@@ -624,19 +610,15 @@ function parseStap(stap){
     return null;
   }
 
-  // Filter frac-tokens (moet volledige teller en noemer hebben)
   const fracs=tokens.filter(t=>t.type==='frac');
   const maals=tokens.filter(t=>t.type==='maal');
 
   if(fracs.length===0)return null;
 
-  // Enkelvoudige breuk
   if(fracs.length===1&&maals.length===0){
-    const r=parseFracToken(fracs[0]);
-    return r;
+    return parseFracToken(fracs[0]);
   }
 
-  // Product van twee breuken
   if(fracs.length===2&&maals.length===1){
     const f1=parseFracToken(fracs[0]);
     const f2=parseFracToken(fracs[1]);
@@ -655,7 +637,6 @@ function parseFracToken(tok){
   const t=evalExpr(tStr);
   const n=evalExpr(nStr);
   if(t===null||n===null||n===0)return null;
-  // Vlag: staat er nog een · in de teller of noemer? Dan nog niet volledig uitgerekend.
   const heeftProduct=tStr.includes('·')||nStr.includes('·');
   return{soort:'breuk',t:teken*t,n,heeftProduct};
 }
@@ -674,17 +655,19 @@ function getLaatsteNietLeeg(){
   return null;
 }
 
-/* ── VALIDATIE ── */
-function corrWaarde(parsed,corrRes){
-  // Geeft de wiskundige waarde van een parsed stap als {t,n}
+/* ── VALIDATIE ──
+   Een tussenstap is correct als hij wiskundig gelijk is aan de einduitkomst.
+   Het antwoord moet een onvereenvoudigbare breuk (of geheel getal) zijn.
+*/
+function corrWaarde(parsed){
   if(parsed.soort==='breuk')return{t:parsed.t,n:parsed.n};
   if(parsed.soort==='geheel')return{t:parsed.waarde,n:1};
-  if(parsed.soort==='product')return berekenProduct(parsed.t1,parsed.n1,parsed.t2,parsed.n2);
+  if(parsed.soort==='product')return reduceer(parsed.t1*parsed.t2,parsed.n1*parsed.n2);
   return null;
 }
 
 function valideerTussenstap(parsed,corrRes){
-  const w=corrWaarde(parsed,corrRes);
+  const w=corrWaarde(parsed);
   if(!w)return false;
   return breukGelijk(w.t,w.n,corrRes.t,corrRes.n);
 }
@@ -692,22 +675,18 @@ function valideerTussenstap(parsed,corrRes){
 function valideerAntwoord(parsed,corrRes,corrIsGeheel){
   if(!parsed)return{ok:false,reden:'leeg'};
 
-  // Product nog niet uitgerekend
   if(parsed.soort==='product'){
-    const res=berekenProduct(parsed.t1,parsed.n1,parsed.t2,parsed.n2);
+    const res=reduceer(parsed.t1*parsed.t2,parsed.n1*parsed.n2);
     if(breukGelijk(res.t,res.n,corrRes.t,corrRes.n))return{ok:false,reden:'nogBewerking'};
     return{ok:false,reden:'fout'};
   }
 
-  // Geheel getal als antwoord
   if(parsed.soort==='geheel'){
     if(!corrIsGeheel)return{ok:false,reden:'fout'};
     return parsed.waarde===corrRes.t?{ok:true}:{ok:false,reden:'fout'};
   }
 
-  // Breuk
   if(parsed.soort==='breuk'){
-    // Als teller of noemer nog een · bevat: nog niet uitgerekend
     if(parsed.heeftProduct)return{ok:false,reden:'nogBewerking'};
     if(!breukGelijk(parsed.t,parsed.n,corrRes.t,corrRes.n))return{ok:false,reden:'fout'};
     const g=gcd(Math.abs(parsed.t),Math.abs(parsed.n));
@@ -732,16 +711,16 @@ function toonOefening(){
   const lbl=document.createElement('span');lbl.className='vraag-label';lbl.textContent='Bereken';
   kaart.appendChild(lbl);
 
-  // Info-tekst
-  const info = document.createElement('p');
-  info.className = 'opmerking';
-  info.textContent = 'Druk op + voor een extra tussenstap als dat nodig is.\nGebruik / om een breuk in te voeren.';
-  info.style.whiteSpace = 'pre-line';
+  const info=document.createElement('p');
+  info.className='opmerking';
+  info.textContent='Druk op + voor een extra tussenstap als dat nodig is.\nGebruik / om een breuk in te voeren.';
+  info.style.whiteSpace='pre-line';
   kaart.appendChild(info);
 
+  // Opgave met deelteken
   const opgBox=document.createElement('div');opgBox.className='opgave-box';
   opgBox.insertAdjacentHTML('beforeend',opgaveTerm(oef,1));
-  const opSpan=document.createElement('span');opSpan.className='opgave-op';opSpan.textContent=MAAL;
+  const opSpan=document.createElement('span');opSpan.className='opgave-op';opSpan.textContent=DEEL;
   opgBox.appendChild(opSpan);
   opgBox.insertAdjacentHTML('beforeend',opgaveTerm(oef,2));
   kaart.appendChild(opgBox);
@@ -796,7 +775,7 @@ function controleer(){
   const cb=document.getElementById('ctrl-btn');
   const vb=document.getElementById('volg-btn');
 
-  const corrRes=berekenProduct(oef.b1.t,oef.b1.n,oef.b2.t,oef.b2.n);
+  const corrRes=berekenDeling(oef.b1.t,oef.b1.n,oef.b2.t,oef.b2.n);
   const corrIsGeheel=corrRes.n===1;
 
   const laatste=getLaatsteNietLeeg();
@@ -813,7 +792,6 @@ function controleer(){
   const{ok:antOk,reden}=valideerAntwoord(antParsed,corrRes,corrIsGeheel);
   const tussenOk=tussenFout.length===0;
 
-  // Markeer
   for(let i=0;i<antIdx;i++){
     const p=parseStap(stappen[i]);
     if(!p)continue;
@@ -866,6 +844,7 @@ function controleer(){
       fb.innerHTML='Je antwoord is niet juist. Bekijk de rekenregel en probeer opnieuw.';
       fb.style.display='block';
       rr.innerHTML=`<div class="rr-titel">REKENREGEL</div><ul>
+        <li>Noteer de deling als een vermenigvuldiging: delen door een getal is hetzelfde als vermenigvuldigen met het omgekeerde.</li>
         <li>Noteer het toestandsteken met behulp van de tekenregel bij het vermenigvuldigen van gehele getallen.</li>
         <li>Vermenigvuldig de tellers. Vermenigvuldig de noemers.</li>
         <li>Schrijf het resultaat als een onvereenvoudigbare breuk.</li>
@@ -884,7 +863,7 @@ function controleer(){
   }
 }
 
-/* ── DEFINITIEVE FEEDBACK ── */
+/* ── DEFINITIEVE FEEDBACK met extra stap: deling → vermenigvuldiging ── */
 function definitieveFeedback(antParsed,corrRes,corrIsGeheel,oef){
   if(antParsed&&antParsed.soort==='breuk'){
     const wg=breukGelijk(antParsed.t,antParsed.n,corrRes.t,corrRes.n);
@@ -899,33 +878,41 @@ function definitieveFeedback(antParsed,corrRes,corrIsGeheel,oef){
 
 function maakUitwerking(oef,corrRes){
   const{b1,b2}=oef;
-  const at1=Math.abs(b1.t),at2=Math.abs(b2.t);
-  const an1=b1.n,an2=b2.n;
-  const negTeller=(b1.t<0)!==(b2.t<0);
+
+  // Omgekeerde van de deler
+  const omgek=omgekeerde(b2.t,b2.n);
+
+  // Teken van het uiteindelijke product (b1.t * omgek.t)
+  const negTeller=(b1.t<0)!==(omgek.t<0);
   const tekenStr=negTeller?'−':'';
-  const fin=reduceer(b1.t*b2.t,b1.n*b2.n);
 
   const rijen=[];
 
-  // Stap 0: opgave
+  // Stap 0: de originele deling
   const t1h=oef.geheel&&oef.geheelPos===1
     ?`<span class="uitw-breuk"><span class="ut">${b1.t}</span></span>`
     :uitwBreuk(b1.t,b1.n);
   const t2h=oef.geheel&&oef.geheelPos===2
     ?(b2.t<0?`<span class="uitw-breuk"><span class="ut">(${b2.t})</span></span>`:`<span class="uitw-breuk"><span class="ut">${b2.t}</span></span>`)
     :uitwBreuk(b2.t,b2.n);
-  rijen.push(`<div class="uitw-rij">${t1h}<span class="uitw-op">${MAAL}</span>${t2h}</div>`);
+  rijen.push(`<div class="uitw-rij">${t1h}<span class="uitw-op">${DEEL}</span>${t2h}</div>`);
 
-  // Stap 1: teken + tellers·noemers
-  const tellExpr=`${at1}${MAAL}${at2}`;
-  const noemExpr=`${an1}${MAAL}${an2}`;
+  // Stap 1: omschrijven naar vermenigvuldiging met omgekeerde
+  const omgekH=uitwBreuk(omgek.t,omgek.n);
+  rijen.push(`<div class="uitw-rij"><span class="uitw-eq">=</span>${t1h}<span class="uitw-op">${MAAL}</span>${omgekH}</div>`);
+
+  // Stap 2: teken + tellers·noemers
+  const at1=Math.abs(b1.t),aOmgekT=Math.abs(omgek.t);
+  const tellExpr=`${at1}${MAAL}${aOmgekT}`;
+  const noemExpr=`${b1.n}${MAAL}${omgek.n}`;
   rijen.push(`<div class="uitw-rij"><span class="uitw-eq">=</span>${tekenStr?`<span style="font-weight:800;padding-right:2px">${tekenStr}</span>`:''}<span class="uitw-breuk"><span class="ut">${tellExpr}</span><span class="us"></span><span class="un">${noemExpr}</span></span></div>`);
 
-  // Stap 2: uitrekenen
-  const ruwT=b1.t*b2.t,ruwN=b1.n*b2.n;
+  // Stap 3: uitrekenen (ruwe waarden voor het product)
+  const ruwT=b1.t*omgek.t, ruwN=b1.n*omgek.n;
   rijen.push(`<div class="uitw-rij"><span class="uitw-eq">=</span>${ruwN===1?`<span class="uitw-breuk"><span class="ut">${ruwT}</span></span>`:uitwBreuk(ruwT,ruwN)}</div>`);
 
-  // Stap 3 (optioneel): vereenvoudigen
+  // Stap 4 (optioneel): vereenvoudigen
+  const fin=reduceer(ruwT,ruwN);
   if(fin.t!==ruwT||fin.n!==ruwN){
     rijen.push(`<div class="uitw-rij"><span class="uitw-eq">=</span>${fin.n===1?`<span class="uitw-breuk"><span class="ut">${fin.t}</span></span>`:uitwBreuk(fin.t,fin.n)}</div>`);
   }
@@ -978,7 +965,7 @@ function vergrendel(){
 function toonEindscherm(){
   updateVoortgang();
   let sc,em,ber;
-  if(punten>=5){sc='A';em='🌟';ber='Uitstekend! Je beheerst het vermenigvuldigen van breuken.';}
+  if(punten>=5){sc='A';em='🌟';ber='Uitstekend! Je beheerst het delen van breuken.';}
   else if(punten>=4){sc='B';em='😊';ber='Goed gedaan! Nog een beetje oefenen en je hebt het helemaal onder de knie.';}
   else{sc='C';em='📚';ber='Blijf oefenen. Je kan dit zeker verbeteren!';}
   document.getElementById('inhoud').innerHTML=`
