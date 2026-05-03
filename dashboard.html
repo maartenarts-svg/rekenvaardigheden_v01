@@ -912,7 +912,7 @@ window.downloadScorelijst=async function(){
       scorelijst.push({email:l.email,naam:l.naam,score1,score2,score3:berekenScore3(voorPeriode,inPeriode,score2)});
     }
     const csv='Email,Naam,Score 1 (Aantal),Score 2 (Types),Score 3 (Moeilijke onderwerpen)\n'+
-      scorelijst.map(r=>`${r.email},${r.naam},${r.score1},${r.score2},${r.score3}`).join('\n');
+      scorelijst.map(r=>`${r.email},"${r.naam.replace(/"/g,'""')}",${r.score1},${r.score2},${r.score3}`).join('\n');
     const link=document.createElement('a');
     link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
     link.setAttribute('download',`scorelijst_${groepNaam}_${startDatum}_${eindDatum}.csv`);
@@ -926,19 +926,27 @@ function berekenScore3(voorPeriode,inPeriode,score2){
   OEFENINGEN.forEach(oef=>{perType[oef.type]=[];});
   voorPeriode.forEach(r=>{if(perType[r.type])perType[r.type].push(r);});
   Object.keys(perType).forEach(t=>perType[t].sort((a,b)=>new Date(b.datum)-new Date(a.datum)));
-  const uitroep=[],smileys=[],sterren=[];
+  const uitroep=[],smileys=[];
   OEFENINGEN.forEach(oef=>{
     const l3=perType[oef.type].slice(0,3).map(s=>s.score);
     if(l3.length<3||l3.includes('C'))uitroep.push(oef.type);
-    else if(l3.every(s=>s==='A'))sterren.push(oef.type);
-    else smileys.push(oef.type);
+    else if(!l3.every(s=>s==='A'))smileys.push(oef.type);
   });
   const types=new Set(inPeriode.map(r=>r.type));
-  if(uitroep.length>=3&&uitroep.some(t=>types.has(t)))return'A';
-  if(uitroep.length<3&&(uitroep.length+smileys.length)>=3&&[...uitroep,...smileys].some(t=>types.has(t)))return'A';
-  if((uitroep.length+smileys.length)<3&&(uitroep.length+smileys.length)>=1&&[...uitroep,...smileys].some(t=>types.has(t))&&score2==='A')return'A';
-  if(!uitroep.length&&!smileys.length&&score2==='A')return'A';
-  return'C';
+  const totaalMoeilijk=uitroep.length+smileys.length;
+  // Case 1: 3+ uitroep-types → minstens 3 ervan geoefend
+  if(uitroep.length>=3)
+    return uitroep.filter(t=>types.has(t)).length>=3?'A':'C';
+  // Case 2: uitroep < 3, maar uitroep+smileys >= 3 → alle uitroep + (3-x) smileys geoefend
+  if(totaalMoeilijk>=3){
+    const alleUitroep=uitroep.every(t=>types.has(t));
+    const aantalSmiley=smileys.filter(t=>types.has(t)).length;
+    return alleUitroep&&aantalSmiley>=(3-uitroep.length)?'A':'C';
+  }
+  // Case 3: alles sterren → Score 2 = A volstaat
+  if(totaalMoeilijk===0)return score2==='A'?'A':'C';
+  // Case 4: uitroep+smileys in [1,2] → alle moeilijke topics geoefend én Score 2 = A
+  return [...uitroep,...smileys].every(t=>types.has(t))&&score2==='A'?'A':'C';
 }
 
 // ── HELPERS ──
