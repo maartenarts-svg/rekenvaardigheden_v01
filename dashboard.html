@@ -904,13 +904,16 @@ window.downloadScorelijst=async function(){
     for(const l of gefilterd){
       const ar=l.resultaten||[];
       const inPeriode=ar.filter(r=>{const d=new Date(r.datum);return d>=start&&d<=eind;});
-      if(!inPeriode.length){scorelijst.push({email:l.email,naam:l.naam,score1:'NI',score2:'NI',score3:'NI'});continue;}
+      const dagVoor=new Date(start); dagVoor.setDate(dagVoor.getDate()-1);
+      const voorPeriode=ar.filter(r=>new Date(r.datum)<=dagVoor);
+      if(!inPeriode.length){scorelijst.push({email:l.email,naam:l.naam,score1:'NI',score2:'NI',score3:'NI',m:[[0,0],[0,0],[0,0]]});continue;}
       const score1=inPeriode.length>=3?'A':'C';
       const score2=new Set(inPeriode.map(r=>r.type)).size>=3?'A':'C';
-      scorelijst.push({email:l.email,naam:l.naam,score1,score2,score3:berekenScore3(ar,inPeriode,score2)});
+      const {score:score3,m}=berekenScore3(voorPeriode,inPeriode,score2);
+      scorelijst.push({email:l.email,naam:l.naam,score1,score2,score3,m});
     }
-    const csv='Email,Naam,Score 1 (Aantal),Score 2 (Types),Score 3 (Moeilijke onderwerpen)\n'+
-      scorelijst.map(r=>`${r.email},"${r.naam.replace(/"/g,'""')}",${r.score1},${r.score2},${r.score3}`).join('\n');
+    const csv='Email,Naam,Score 1 (Aantal),Score 2 (Types),Score 3 (Moeilijke onderwerpen),Uitroep aantal,Uitroep gemaakt,Smiley aantal,Smiley gemaakt,Ster aantal,Ster gemaakt\n'+
+      scorelijst.map(r=>`${r.email},"${r.naam.replace(/"/g,'""')}",${r.score1},${r.score2},${r.score3},${r.m[0][0]},${r.m[0][1]},${r.m[1][0]},${r.m[1][1]},${r.m[2][0]},${r.m[2][1]}`).join('\n');
     const link=document.createElement('a');
     link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
     link.setAttribute('download',`scorelijst_${groepNaam}_${startDatum}_${eindDatum}.csv`);
@@ -919,10 +922,10 @@ window.downloadScorelijst=async function(){
   }catch(err){toonBericht(berichtEl,'fout',`Fout: ${err.message}`);}
 };
 
-function berekenScore3(alleResultaten,inPeriode,score2){
+function berekenScore3(voorPeriode,inPeriode,score2){
   const perType={};
   OEFENINGEN.forEach(oef=>{perType[oef.type]=[];});
-  alleResultaten.forEach(r=>{if(perType[r.type])perType[r.type].push(r);});
+  voorPeriode.forEach(r=>{if(perType[r.type])perType[r.type].push(r);});
   Object.keys(perType).forEach(t=>perType[t].sort((a,b)=>new Date(b.datum)-new Date(a.datum)));
   const typesInPeriode=new Set(inPeriode.map(r=>r.type));
   // matrix: [[uitroep_aantal,uitroep_gemaakt],[smiley_aantal,smiley_gemaakt],[ster_aantal,ster_gemaakt]]
@@ -934,11 +937,13 @@ function berekenScore3(alleResultaten,inPeriode,score2){
     if(typesInPeriode.has(oef.type))m[rij][1]++;
   });
   const [uA,uG]=m[0],[sA,sG]=m[1];
-  if(uG>=3)return'A';
-  if(uA>uG)return'C';
-  if(uG+sG>=3)return'A';
-  if(uA+sA>uG+sG)return'C';
-  return score2==='A'?'A':'C';
+  let score;
+  if(uG>=3)score='A';
+  else if(uA>uG)score='C';
+  else if(uG+sG>=3)score='A';
+  else if(uA+sA>uG+sG)score='C';
+  else score=score2==='A'?'A':'C';
+  return{score,m};
 }
 
 // ── HELPERS ──
