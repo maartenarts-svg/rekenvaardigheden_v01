@@ -904,12 +904,10 @@ window.downloadScorelijst=async function(){
     for(const l of gefilterd){
       const ar=l.resultaten||[];
       const inPeriode=ar.filter(r=>{const d=new Date(r.datum);return d>=start&&d<=eind;});
-      const dagVoor=new Date(start); dagVoor.setDate(dagVoor.getDate()-1);
-      const voorPeriode=ar.filter(r=>new Date(r.datum)<=dagVoor);
       if(!inPeriode.length){scorelijst.push({email:l.email,naam:l.naam,score1:'NI',score2:'NI',score3:'NI'});continue;}
       const score1=inPeriode.length>=3?'A':'C';
       const score2=new Set(inPeriode.map(r=>r.type)).size>=3?'A':'C';
-      scorelijst.push({email:l.email,naam:l.naam,score1,score2,score3:berekenScore3(voorPeriode,inPeriode,score2)});
+      scorelijst.push({email:l.email,naam:l.naam,score1,score2,score3:berekenScore3(ar,inPeriode,score2)});
     }
     const csv='Email,Naam,Score 1 (Aantal),Score 2 (Types),Score 3 (Moeilijke onderwerpen)\n'+
       scorelijst.map(r=>`${r.email},"${r.naam.replace(/"/g,'""')}",${r.score1},${r.score2},${r.score3}`).join('\n');
@@ -921,32 +919,26 @@ window.downloadScorelijst=async function(){
   }catch(err){toonBericht(berichtEl,'fout',`Fout: ${err.message}`);}
 };
 
-function berekenScore3(voorPeriode,inPeriode,score2){
+function berekenScore3(alleResultaten,inPeriode,score2){
   const perType={};
   OEFENINGEN.forEach(oef=>{perType[oef.type]=[];});
-  voorPeriode.forEach(r=>{if(perType[r.type])perType[r.type].push(r);});
+  alleResultaten.forEach(r=>{if(perType[r.type])perType[r.type].push(r);});
   Object.keys(perType).forEach(t=>perType[t].sort((a,b)=>new Date(b.datum)-new Date(a.datum)));
-  const uitroep=[],smileys=[];
+  const typesInPeriode=new Set(inPeriode.map(r=>r.type));
+  // matrix: [[uitroep_aantal,uitroep_gemaakt],[smiley_aantal,smiley_gemaakt],[ster_aantal,ster_gemaakt]]
+  const m=[[0,0],[0,0],[0,0]];
   OEFENINGEN.forEach(oef=>{
     const l3=perType[oef.type].slice(0,3).map(s=>s.score);
-    if(l3.length<3||l3.includes('C'))uitroep.push(oef.type);
-    else if(!l3.every(s=>s==='A'))smileys.push(oef.type);
+    const rij=l3.length<3||l3.includes('C')?0:l3.every(s=>s==='A')?2:1;
+    m[rij][0]++;
+    if(typesInPeriode.has(oef.type))m[rij][1]++;
   });
-  const types=new Set(inPeriode.map(r=>r.type));
-  const totaalMoeilijk=uitroep.length+smileys.length;
-  // Case 1: 3+ uitroep-types → minstens 3 ervan geoefend
-  if(uitroep.length>=3)
-    return uitroep.filter(t=>types.has(t)).length>=3?'A':'C';
-  // Case 2: uitroep < 3, maar uitroep+smileys >= 3 → alle uitroep + (3-x) smileys geoefend
-  if(totaalMoeilijk>=3){
-    const alleUitroep=uitroep.every(t=>types.has(t));
-    const aantalSmiley=smileys.filter(t=>types.has(t)).length;
-    return alleUitroep&&aantalSmiley>=(3-uitroep.length)?'A':'C';
-  }
-  // Case 3: alles sterren → Score 2 = A volstaat
-  if(totaalMoeilijk===0)return score2==='A'?'A':'C';
-  // Case 4: uitroep+smileys in [1,2] → alle moeilijke topics geoefend én Score 2 = A
-  return [...uitroep,...smileys].every(t=>types.has(t))&&score2==='A'?'A':'C';
+  const [uA,uG]=m[0],[sA,sG]=m[1];
+  if(uG>=3)return'A';
+  if(uA>uG)return'C';
+  if(uG+sG>=3)return'A';
+  if(uA+sA>uG+sG)return'C';
+  return score2==='A'?'A':'C';
 }
 
 // ── HELPERS ──
