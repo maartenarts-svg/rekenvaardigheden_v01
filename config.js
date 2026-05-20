@@ -66,10 +66,10 @@ const OEFENINGEN = [
 // ── FIREBASE INITIALISATIE ──
 // Wordt automatisch geladen door alle pagina's
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { initializeFirestore, persistentLocalCache } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = initializeFirestore(app, { localCache: persistentLocalCache() });
 
 // Export voor gebruik in andere bestanden
 export { db, ADMIN_EMAIL, ADMIN_CODE, OEFENINGEN };

@@ -784,6 +784,7 @@ function toonEindscherm() {
       <div class="score-badge ${sc}">Score: ${sc}</div>
       <div class="eind-bericht">${ber}</div>
       <button class="btn btn-primair" id="terug-btn">← Terug naar oefeningen</button>
+      <p id="opslaan-status" style="margin-top:14px;font-size:0.82rem;color:var(--muted);">Resultaat opslaan…</p>
     </div>`;
   document.getElementById('terug-btn').addEventListener('click',()=>{ window.location.href='index.html'; });
   slaanOp(sc);
@@ -795,7 +796,13 @@ async function slaanOp(sc) {
       type:TYPE_NR,datum:new Date().toISOString(),score:sc,
       totaal:punten,eerste:eerstePoging,tweede:tweedePoging,fout:foutGegaan
     })});
-  } catch(e){ console.error('Opslaan mislukt:',e); }
+    const el=document.getElementById('opslaan-status');
+    if(el){el.textContent='✓ Resultaat opgeslagen.';el.style.color='var(--success)';}
+  } catch(e){
+    console.error('Opslaan mislukt:',e);
+    const el=document.getElementById('opslaan-status');
+    if(el){el.textContent='⚠️ Resultaat kon niet worden opgeslagen. Controleer je internetverbinding.';el.style.color='var(--warning)';}
+  }
 }
 
 /* ─── Init ─────────────────────────────────────────────── */

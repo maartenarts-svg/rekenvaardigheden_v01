@@ -882,6 +882,7 @@ function toonEindscherm() {
       <div class="score-badge ${algScore}">Score: ${algScore}</div>
       <div class="eind-bericht">${bericht}</div>
       <button class="btn btn-primair" id="terug-btn">← Terug naar oefeningen</button>
+      <p id="opslaan-status" style="margin-top:14px;font-size:0.82rem;color:var(--muted);">Resultaat opslaan…</p>
     </div>
   `;
 
@@ -909,8 +910,12 @@ async function slaanOp(algScore) {
         fout: foutGegaan
       })
     });
+    const el = document.getElementById('opslaan-status');
+    if (el) { el.textContent = '✓ Resultaat opgeslagen.'; el.style.color = 'var(--success)'; }
   } catch(err) {
     console.error('Fout bij opslaan:', err);
+    const el = document.getElementById('opslaan-status');
+    if (el) { el.textContent = '⚠️ Resultaat kon niet worden opgeslagen. Controleer je internetverbinding.'; el.style.color = 'var(--warning)'; }
   }
 }
 
