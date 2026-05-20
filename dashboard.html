@@ -171,6 +171,13 @@
     .lid-naam { font-size: 0.88rem; font-weight: 600; }
     .lid-meta { font-size: 0.75rem; color: var(--muted); }
 
+    /* ── SESSIE-SCORE TAG ── */
+    .score-tag { display:inline-block; font-weight:800; padding:2px 10px; border-radius:6px; font-size:0.85rem; }
+    .score-tag.A { background:rgba(168,230,161,0.15); color:#a8e6a1; }
+    .score-tag.B { background:rgba(255,244,163,0.12); color:#fff4a3; }
+    .score-tag.C { background:rgba(255,203,164,0.12); color:#ffcba4; }
+    .sessie-cb-col { width:36px; text-align:center; }
+
     @media (max-width: 600px) {
       .leerling-form { grid-template-columns: 1fr; }
       .leerling-form .form-groep.vol { grid-column: 1; }
@@ -254,6 +261,13 @@
       <p>Selecteer een leerling om hun groei te bekijken.</p>
       <div style="margin-bottom:16px"><select id="leerling-select" class="select-veld"><option value="">-- Selecteer een leerling --</option></select></div>
       <div id="leerling-groei-container"></div>
+    </div>
+
+    <div class="sectie">
+      <h2>🗑️ Sessies verwijderen</h2>
+      <p>Selecteer een leerling, duid de sessies aan die je wil verwijderen en klik op de verwijderknop.</p>
+      <div style="margin-bottom:16px"><select id="sessie-leerling-select" class="select-veld"><option value="">-- Selecteer een leerling --</option></select></div>
+      <div id="sessies-container"></div>
     </div>
   </div>
 
@@ -775,15 +789,22 @@ window.sluitModal = function(id,e) {
 
 // ── Groei dropdown ──
 function vulLeerlingDropdown() {
-  document.getElementById('leerling-select').innerHTML =
-    '<option value="">-- Selecteer een leerling --</option>'+
+  const opties = '<option value="">-- Selecteer een leerling --</option>'+
     alleLeerlingen.map((l,i)=>`<option value="${i}">${l.naam}</option>`).join('');
+  document.getElementById('leerling-select').innerHTML = opties;
+  document.getElementById('sessie-leerling-select').innerHTML = opties;
 }
 document.getElementById('leerling-select').addEventListener('change',e=>{
   const idx=e.target.value;
   const c=document.getElementById('leerling-groei-container');
   if(idx===''){c.innerHTML='';return;}
   renderLeerlingGroei(alleLeerlingen[idx]);
+});
+document.getElementById('sessie-leerling-select').addEventListener('change',e=>{
+  const idx=e.target.value;
+  const c=document.getElementById('sessies-container');
+  if(idx===''){c.innerHTML='';return;}
+  renderSessies(alleLeerlingen[idx]);
 });
 
 function renderLeerlingGroei(leerling) {
@@ -809,6 +830,81 @@ function renderLeerlingGroei(leerling) {
   });
   html+='</div>';
   c.innerHTML=html;
+}
+
+// ── Sessies verwijderen ──
+function renderSessies(leerling) {
+  const c = document.getElementById('sessies-container');
+  const resultaten = leerling.resultaten || [];
+  if (!resultaten.length) { c.innerHTML=`<div class="leeg">Nog geen sessies gevonden.</div>`; return; }
+
+  const gesorteerdMetIdx = resultaten.map((r,i)=>({r,i}))
+    .sort((a,b)=>new Date(b.r.datum)-new Date(a.r.datum));
+
+  const rijen = gesorteerdMetIdx.map(({r,i})=>{
+    const d=new Date(r.datum);
+    const datumStr=`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    const oefNaam=OEFENINGEN.find(o=>o.type===r.type)?.naam||`Type ${r.type}`;
+    const sc=(r.score||'C').toUpperCase();
+    return `<tr>
+      <td class="sessie-cb-col"><input type="checkbox" class="sessie-cb" data-idx="${i}" autocomplete="off"></td>
+      <td>${datumStr}</td>
+      <td>${oefNaam}</td>
+      <td><span class="score-tag ${sc}">${sc}</span></td>
+      <td>${r.totaal??'—'}</td>
+      <td>${r.eerste??'—'}</td>
+      <td>${r.tweede??'—'}</td>
+      <td>${r.fout??'—'}</td>
+    </tr>`;
+  }).join('');
+
+  c.innerHTML=`
+    <div class="preview-tabel" style="margin-bottom:12px">
+      <table>
+        <thead><tr>
+          <th class="sessie-cb-col"><input type="checkbox" id="sessie-alles-cb" title="Selecteer alles" autocomplete="off"></th>
+          <th>Datum</th><th>Type</th><th>Score</th><th>Totaal</th><th>1e poging</th><th>2e poging</th><th>Fout</th>
+        </tr></thead>
+        <tbody>${rijen}</tbody>
+      </table>
+    </div>
+    <div class="knoppen-rij">
+      <button class="btn btn-danger" id="verwijder-sessies-btn" disabled>🗑️ Verwijder geselecteerde</button>
+    </div>
+    <div class="bericht" id="sessies-bericht"></div>`;
+
+  const allesCb=document.getElementById('sessie-alles-cb');
+  const verwijderBtn=document.getElementById('verwijder-sessies-btn');
+
+  function updateBtn() {
+    const checked=document.querySelectorAll('.sessie-cb:checked');
+    const all=document.querySelectorAll('.sessie-cb');
+    verwijderBtn.disabled=checked.length===0;
+    allesCb.indeterminate=checked.length>0&&checked.length<all.length;
+    allesCb.checked=all.length>0&&checked.length===all.length;
+  }
+
+  document.querySelectorAll('.sessie-cb').forEach(cb=>cb.addEventListener('change',updateBtn));
+  allesCb.addEventListener('change',()=>{
+    document.querySelectorAll('.sessie-cb').forEach(cb=>cb.checked=allesCb.checked);
+    updateBtn();
+  });
+
+  verwijderBtn.addEventListener('click',async()=>{
+    const geselecteerd=[...document.querySelectorAll('.sessie-cb:checked')].map(cb=>parseInt(cb.dataset.idx));
+    if(!geselecteerd.length)return;
+    if(!confirm(`${geselecteerd.length} sessie(s) definitief verwijderen van ${leerling.naam}?`))return;
+    try {
+      const nieuweResultaten=leerling.resultaten.filter((_,idx)=>!geselecteerd.includes(idx));
+      await updateDoc(doc(db,'leerlingen',leerling.email),{resultaten:nieuweResultaten});
+      leerling.resultaten=nieuweResultaten;
+      laadStatistieken();
+      renderSessies(leerling);
+      toonBericht('sessies-bericht','succes',`✓ ${geselecteerd.length} sessie(s) verwijderd.`);
+      const groeiIdx=document.getElementById('leerling-select').value;
+      if(groeiIdx!==''&&alleLeerlingen[groeiIdx]?.email===leerling.email) renderLeerlingGroei(leerling);
+    } catch(err) { toonBericht('sessies-bericht','fout',`Fout: ${err.message}`); }
+  });
 }
 
 // ══════════════════════════════════════
