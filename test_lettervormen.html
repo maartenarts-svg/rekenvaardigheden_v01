@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEST — Lettervormen: term-selectie</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #20243a;
+      --border: rgba(255,255,255,0.08);
+      --text: #e8eaf0;
+      --muted: #8891aa;
+      --accent: #5b8dee;
+      --success: #4cbb8a;
+      --danger: #e05757;
+      --warning: #f5c542;
+      --radius: 14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      padding: 32px 20px 60px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 20% 20%, rgba(91,141,238,0.07) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 80%, rgba(76,187,138,0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .dev-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      background: rgba(245,197,66,0.15);
+      color: var(--warning);
+      border: 1px solid rgba(245,197,66,0.3);
+      border-radius: 6px;
+      padding: 3px 9px;
+    }
+
+    /* ── Hoofd-grid ── */
+    .hoofd-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 700px) {
+      .hoofd-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Oefening-paneel ── */
+    .oefening-paneel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .paneel-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.8px;
+      color: var(--muted);
+    }
+
+    /* ── Stijl-knoppen ── */
+    .stijl-knoppen {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .stijl-knop {
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+
+    .stijl-knop:hover {
+      border-color: rgba(255,255,255,0.18);
+      color: var(--text);
+    }
+
+    .stijl-knop.actief {
+      border-color: var(--accent);
+      background: rgba(91,141,238,0.15);
+      color: var(--text);
+    }
+
+    .stijl-knop[data-stijl="wis"].actief {
+      border-color: var(--danger);
+      background: rgba(224,87,87,0.1);
+      color: var(--danger);
+    }
+
+
+    /* ── Uitdrukking ── */
+    .uitdrukking-doos {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 32px;
+      min-height: 90px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 2px;
+      font-size: 2rem;
+      font-weight: 800;
+      user-select: none;
+    }
+
+    .term-clickarea {
+      cursor: pointer;
+      padding: 2px 5px;
+      border-radius: 5px;
+      transition: background 0.12s;
+      display: inline-block;
+    }
+
+    .term-clickarea:hover {
+      background: rgba(255,255,255,0.07);
+    }
+
+    .term-span {
+      display: inline-block;
+    }
+
+
+    /* ── Debug-paneel ── */
+    .debug-paneel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .debug-titel {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .debug-groep {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .debug-header {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .enkel-dot  { background: var(--accent); }
+    .dubbel-dot { background: var(--success); }
+    .golf-dot   { background: var(--warning); }
+
+    .debug-lijst {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 28px;
+    }
+
+    .debug-term {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 10px;
+      display: inline-block;
+    }
+
+    .debug-leeg {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Lettervormen — term-selectie</h1>
+    <span class="dev-badge">testbestand</span>
+  </header>
+
+  <div class="hoofd-grid">
+
+    <!-- Linker paneel: oefening -->
+    <div class="oefening-paneel">
+      <p class="paneel-label">Kies een stijl, klik dan op een term</p>
+
+      <div class="stijl-knoppen">
+        <button class="stijl-knop" data-stijl="enkel">Enkel</button>
+        <button class="stijl-knop" data-stijl="dubbel">Dubbel</button>
+        <button class="stijl-knop" data-stijl="golf">Golf</button>
+        <button class="stijl-knop" data-stijl="wis">Wis</button>
+      </div>
+
+      <div class="uitdrukking-doos" id="uitdrukking-doos"></div>
+
+    </div>
+
+    <!-- Rechter paneel: debug output -->
+    <div class="debug-paneel">
+      <p class="debug-titel">Output — groepen per stijl</p>
+
+      <div class="debug-groep" id="groep-enkel">
+        <div class="debug-header">
+          <span class="dot enkel-dot"></span>
+          Enkel onderstreept
+        </div>
+        <div class="debug-lijst" id="lijst-enkel">
+          <span class="debug-leeg">(leeg)</span>
+        </div>
+      </div>
+
+      <div class="debug-groep" id="groep-dubbel">
+        <div class="debug-header">
+          <span class="dot dubbel-dot"></span>
+          Dubbel onderstreept
+        </div>
+        <div class="debug-lijst" id="lijst-dubbel">
+          <span class="debug-leeg">(leeg)</span>
+        </div>
+      </div>
+
+      <div class="debug-groep" id="groep-golf">
+        <div class="debug-header">
+          <span class="dot golf-dot"></span>
+          Golf onderstreept
+        </div>
+        <div class="debug-lijst" id="lijst-golf">
+          <span class="debug-leeg">(leeg)</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   MAAK ONDERSTREPING
+   Geeft een span terug met onderstreping, optioneel via toggle.
+
+   inhoud   : string of DOM-node
+   stijl    : 'enkel' | 'dubbel' | 'golf'
+   diepte   : afstand tussen inhoud en lijn, bv. '0.1cm' of '0.3cm'
+              (verhoog bij breuken zodat lijn onder de noemer komt)
+   toggle   : true = verschijnt via toggle | false = altijd zichtbaar
+   ============================================================ */
+function maakOnderstreping(inhoud, stijl, diepte, toggle = true, hoogte = `calc(${diepte} + 0.02cm)`) {
+  const wrapper = document.createElement('span');
+  wrapper.style.display       = 'inline-block';
+  wrapper.style.position      = 'relative';
+  wrapper.style.paddingBottom = diepte;
+  wrapper.style.paddingTop    = hoogte;
+
+  const inhoudSpan = document.createElement('span');
+  if (typeof inhoud === 'string') inhoudSpan.innerHTML = inhoud;
+  else inhoudSpan.appendChild(inhoud);
+  wrapper.appendChild(inhoudSpan);
+
+  const kleur = toggle ? '#1a4fa0' : 'currentColor';
+
+  function maakLijn() {
+    const lijn = document.createElement('span');
+    lijn.style.position = 'absolute';
+    lijn.style.left     = '0';
+    lijn.style.right    = '0';
+    lijn.style.bottom   = '0';
+    if (toggle) {
+      lijn.style.display = 'none';
+      lijn.classList.add('opl-toggle-lijn');
+    }
+    return lijn;
+  }
+
+  if (stijl === 'enkel') {
+    const lijn = maakLijn();
+    lijn.style.borderBottom = `1.5px solid ${kleur}`;
+    wrapper.appendChild(lijn);
+  } else if (stijl === 'dubbel') {
+    const lijn1 = maakLijn();
+    lijn1.style.borderBottom = `1.5px solid ${kleur}`;
+    lijn1.style.bottom       = '0';
+    wrapper.appendChild(lijn1);
+    const lijn2 = maakLijn();
+    lijn2.style.borderBottom = `1.5px solid ${kleur}`;
+    lijn2.style.bottom       = '3px';
+    wrapper.appendChild(lijn2);
+  } else if (stijl === 'golf') {
+    const lijn = maakLijn();
+    lijn.style.height             = '4px';
+    lijn.style.bottom             = '0';
+    const kleurHex                = toggle ? '%231a4fa0' : '%23000000';
+    lijn.style.backgroundImage    = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Cpath d='M0 2 Q2 0 4 2 Q6 4 8 2' fill='none' stroke='${kleurHex}' stroke-width='1.5'/%3E%3C/svg%3E")`;
+    lijn.style.backgroundRepeat   = 'repeat-x';
+    lijn.style.backgroundPosition = 'bottom left';
+    lijn.style.backgroundSize     = '8px 4px';
+    wrapper.appendChild(lijn);
+  }
+
+  return wrapper;
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const UITDRUKKING = 'a + 5 - 4a + 3';
+
+let termen = [];        // [{ tekst: string, stijl: null|'enkel'|'dubbel'|'golf' }]
+let actieveStijl = null; // null | 'wis' | 'enkel' | 'dubbel' | 'golf'
+
+/* ============================================================
+   TERM-PARSING
+   Splitst 'a + 5 - 4a + 3' naar ['a', '+ 5', '- 4a', '+ 3']
+   ============================================================ */
+function parseTermen(uitdr) {
+  return uitdr
+    .split(/(?=\s*[+\-])/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(tekst => ({ tekst, stijl: null }));
+}
+
+/* ============================================================
+   RENDER: UITDRUKKING
+   Herbouwt de uitdrukkingsdoos volledig vanuit termen[].
+   ============================================================ */
+function renderTermen() {
+  const doos = document.getElementById('uitdrukking-doos');
+  doos.innerHTML = '';
+
+  termen.forEach((term, idx) => {
+    const clickWrap = document.createElement('span');
+    clickWrap.className = 'term-clickarea';
+    clickWrap.addEventListener('click', () => handleTermKlik(idx));
+
+    if (term.stijl === null) {
+      const span = document.createElement('span');
+      span.className = 'term-span';
+      span.textContent = term.tekst;
+      clickWrap.appendChild(span);
+    } else {
+      const wrapper = maakOnderstreping(term.tekst, term.stijl, '0.18cm', false);
+      clickWrap.appendChild(wrapper);
+    }
+
+    doos.appendChild(clickWrap);
+  });
+
+  // Golf-kleur patch: de SVG gebruikt %23000000 (zwart) bij toggle=false,
+  // wat onzichtbaar is op een donkere achtergrond. Vervang door lichte kleur.
+  const clickWraps = doos.querySelectorAll('.term-clickarea');
+  clickWraps.forEach((wrap, i) => {
+    if (termen[i] && termen[i].stijl === 'golf') {
+      const lijnSpans = wrap.querySelectorAll('span[style]');
+      lijnSpans.forEach(s => {
+        if (s.style.backgroundImage && s.style.backgroundImage.includes('svg')) {
+          s.style.backgroundImage =
+            s.style.backgroundImage.replace(/%23000000/g, '%23e8eaf0');
+        }
+      });
+    }
+  });
+}
+
+/* ============================================================
+   RENDER: DEBUG-PANEEL
+   ============================================================ */
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function renderDebug() {
+  ['enkel', 'dubbel', 'golf'].forEach(stijl => {
+    const lijst = document.getElementById('lijst-' + stijl);
+    const gevonden = termen.filter(t => t.stijl === stijl);
+    if (gevonden.length === 0) {
+      lijst.innerHTML = '<span class="debug-leeg">(leeg)</span>';
+    } else {
+      lijst.innerHTML = gevonden
+        .map(t => `<span class="debug-term">${escapeHtml(t.tekst)}</span>`)
+        .join('');
+    }
+  });
+}
+
+/* ============================================================
+   INTERACTIE: KLIK OP TERM
+   ============================================================ */
+function handleTermKlik(idx) {
+  if (actieveStijl === null) return;
+
+  const term = termen[idx];
+
+  if (actieveStijl === 'wis' || term.stijl === actieveStijl) {
+    term.stijl = null;
+  } else {
+    term.stijl = actieveStijl;
+  }
+
+  renderTermen();
+  renderDebug();
+}
+
+/* ============================================================
+   INTERACTIE: STIJL-KNOPPEN
+   ============================================================ */
+function updateStijlKnoppen() {
+  document.querySelectorAll('.stijl-knop').forEach(knop => {
+    knop.classList.toggle('actief', knop.dataset.stijl === actieveStijl);
+  });
+
+}
+
+function koppelStijlKnoppen() {
+  document.querySelectorAll('.stijl-knop').forEach(knop => {
+    knop.addEventListener('click', () => {
+      actieveStijl = (actieveStijl === knop.dataset.stijl) ? null : knop.dataset.stijl;
+      updateStijlKnoppen();
+    });
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init() {
+  termen = parseTermen(UITDRUKKING);
+  renderTermen();
+  renderDebug();
+  koppelStijlKnoppen();
+}
+
+init();
+</script>
+</body>
+</html>

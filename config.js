@@ -61,6 +61,14 @@ const OEFENINGEN = [
     kleur: "#5CB85C",
     icon: "➗"
   },
+  {
+    type: 6,
+    naam: "Lettervormen herleiden",
+    beschrijving: "Vereenvoudig uitdrukkingen door gelijksoortige lettervormen samen te tellen.",
+    url: "lettervormen_herleiden.html",
+    kleur: "#9B59B6",
+    icon: "🔤"
+  },
 ];
 
 // ── FIREBASE INITIALISATIE ──
