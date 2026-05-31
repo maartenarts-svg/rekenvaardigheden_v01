@@ -69,6 +69,14 @@ const OEFENINGEN = [
     kleur: "#9B59B6",
     icon: "🔤"
   },
+  {
+    type: 7,
+    naam: "Procentrekenen",
+    beschrijving: "Bereken een percentage, vermeerder of verminder een getal met een percentage.",
+    url: "procentrekenen.html",
+    kleur: "#E8A838",
+    icon: "%"
+  },
 ];
 
 // ── FIREBASE INITIALISATIE ──

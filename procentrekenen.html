@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Procentrekenen – Wiskunde Oefenplatform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #20243a;
+      --border: rgba(255,255,255,0.08);
+      --text: #e8eaf0;
+      --muted: #8891aa;
+      --accent: #5b8dee;
+      --success: #4cbb8a;
+      --danger: #e05757;
+      --warning: #f5c542;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(91,141,238,0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(76,187,138,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .page-title h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .page-title span {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* ── VOORTGANGSBALK ── */
+    .progress-wrap {
+      margin-bottom: 28px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .progress-track {
+      height: 8px;
+      background: var(--surface);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #a0c4ff);
+      border-radius: 99px;
+      transition: width 0.5s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+
+    /* ── OEFENING KAART ── */
+    .oefening-kaart {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .vraag-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .vraag-tekst {
+      font-size: 1.9rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 28px;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    /* ── STAP RIJEN ── */
+    .stap-rij {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .equals {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--muted);
+      min-width: 24px;
+    }
+
+    .invoer {
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      width: 160px;
+      text-align: center;
+    }
+
+    .invoer:focus {
+      border-color: var(--accent);
+      background: rgba(91,141,238,0.06);
+    }
+
+    .invoer.correct {
+      border-color: var(--success);
+      background: rgba(76,187,138,0.1);
+      color: var(--success);
+    }
+
+    .invoer.fout {
+      border-color: var(--danger);
+      background: rgba(224,87,87,0.1);
+      color: var(--danger);
+    }
+
+    .invoer:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .mult-sym {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .getal1-val {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .resultaat-val {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 4px 0;
+      min-width: 60px;
+    }
+
+    /* ── KNOPPEN ── */
+    .knoppen-rij {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 22px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-primair {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primair:not(:disabled):hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .btn-succes {
+      background: var(--success);
+      color: #0c2e1c;
+    }
+
+    .btn-succes:not(:disabled):hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    /* ── FEEDBACK ── */
+    .feedback-box {
+      margin-top: 20px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      line-height: 1.65;
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .feedback-box.succes {
+      background: rgba(76,187,138,0.1);
+      border: 1px solid rgba(76,187,138,0.3);
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .feedback-box.fout-tijdelijk {
+      background: rgba(245,197,66,0.08);
+      border: 1px solid rgba(245,197,66,0.3);
+      color: var(--warning);
+    }
+
+    .feedback-box.fout-definitief {
+      background: rgba(224,87,87,0.09);
+      border: 1px solid rgba(224,87,87,0.3);
+      color: var(--danger);
+    }
+
+    .uitwerking {
+      margin-top: 12px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 2.2;
+    }
+
+    .uitw-rij {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .uitw-hint {
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    /* ── REKENREGEL ── */
+    .rekenregel-blok {
+      margin-top: 16px;
+      background: var(--surface2);
+      border: 1px solid rgba(91,141,238,0.2);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .rekenregel-blok .rr-titel {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .rekenregel-blok ul {
+      padding-left: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .rekenregel-blok ul li {
+      display: flex;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .rekenregel-blok ul li::before {
+      content: '•';
+      color: var(--accent);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── EINDSCHERM ── */
+    .eindscherm {
+      text-align: center;
+      padding: 48px 24px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .eind-emoji { font-size: 3.5rem; margin-bottom: 16px; }
+
+    .eind-punten {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .eind-score-label {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .score-badge {
+      display: inline-block;
+      font-size: 2rem;
+      font-weight: 800;
+      padding: 10px 32px;
+      border-radius: 12px;
+      margin-bottom: 28px;
+    }
+
+    .score-badge.A { background: rgba(168,230,161,0.15); color: #a8e6a1; border: 2px solid rgba(168,230,161,0.4); }
+    .score-badge.B { background: rgba(255,244,163,0.12); color: #fff4a3; border: 2px solid rgba(255,244,163,0.35); }
+    .score-badge.C { background: rgba(255,203,164,0.12); color: #ffcba4; border: 2px solid rgba(255,203,164,0.35); }
+
+    .eind-bericht {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <a href="index.html" class="back-btn">← Terug naar oefeningen</a>
+    <div class="page-title">
+      <h1>% Procentrekenen</h1>
+      <span id="user-label">Laden...</span>
+    </div>
+  </header>
+
+  <!-- Voortgangsbalk -->
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span id="progress-tekst">Oefening 1 van 10</span>
+      <span id="score-live">0 / 0 pt</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Inhoud -->
+  <div id="inhoud"></div>
+
+</div>
+
+<script type="module">
+import { db, OEFENINGEN } from './config.js';
+import { doc, getDoc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+// ── Constanten ──
+const TOTAAL = 10;
+const TYPE_NR = 7;
+
+// ── State ──
+let user = null;
+let oefeningen = [];
+let huidigeIdx = 0;
+let punten = 0;
+let eerstePoging = 0;
+let tweedePoging = 0;
+let foutGegaan = 0;
+let pogingTeller = 0;
+
+// ── Login check ──
+function checkLogin() {
+  const stored = localStorage.getItem('wiskunde_user');
+  if (!stored) { window.location.href = 'login.html'; return null; }
+  try {
+    const u = JSON.parse(stored);
+    if (u.isAdmin) { window.location.href = 'dashboard.html'; return null; }
+    document.getElementById('user-label').textContent = u.naam || u.email;
+    return u;
+  } catch(e) {
+    localStorage.removeItem('wiskunde_user');
+    window.location.href = 'login.html';
+    return null;
+  }
+}
+
+// ── Hulpfuncties ──
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function formatNL(num) {
+  return parseFloat(num.toFixed(10)).toString().replace('.', ',');
+}
+
+// ── Oefeningen genereren ──
+function genereer() {
+  // 4 type1, 3 type2, 3 type3, willekeurige volgorde
+  const types = [1, 1, 1, 1, 2, 2, 2, 3, 3, 3];
+  for (let i = types.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [types[i], types[j]] = [types[j], types[i]];
+  }
+
+  return types.map(type => {
+    const getal1 = rand(100, 500);
+    const getal2 = (type === 3) ? rand(5, 95) : rand(10, 300);
+    let antwoord, tekst;
+    if (type === 1) {
+      antwoord = getal2 / 100;
+      tekst = `${getal2} % van ${getal1}`;
+    } else if (type === 2) {
+      antwoord = 1 + getal2 / 100;
+      tekst = `${getal1} vermeerderen met ${getal2} %`;
+    } else {
+      antwoord = 1 - getal2 / 100;
+      tekst = `${getal1} verminderen met ${getal2} %`;
+    }
+    return { type, getal1, getal2, antwoord, tekst };
+  });
+}
+
+// ── Voortgang updaten ──
+function updateVoortgang() {
+  const pct = (huidigeIdx / TOTAAL) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-tekst').textContent =
+    huidigeIdx < TOTAAL ? `Oefening ${huidigeIdx + 1} van ${TOTAAL}` : `Klaar!`;
+  document.getElementById('score-live').textContent = `${punten} / ${huidigeIdx}`;
+}
+
+// ── Rekenregel bepalen ──
+function bepaalRekenregel(oef) {
+  if (oef.type === 1) {
+    return `<div class="rr-titel">REKENREGEL</div>
+      <ul>
+        <li>Een percentage kun je schrijven als een decimaal getal.</li>
+        <li>Om een percentage te nemen van een getal, vermenigvuldig je het percentage (in decimale schrijfwijze) met dat getal.</li>
+      </ul>`;
+  } else if (oef.type === 2) {
+    return `<div class="rr-titel">REKENREGEL</div>
+      <ul>
+        <li>Als je vermeerdert met een percentage, dan bereken je eerst hoeveel procent je in totaal hebt. Je vertrekt van 100 % en je doet er een percentage bij.</li>
+        <li>Dat totale percentage kun je schrijven als een decimaal getal.</li>
+        <li>Om een percentage te nemen van een getal, vermenigvuldig je het percentage (in decimale schrijfwijze) met dat getal.</li>
+      </ul>`;
+  } else {
+    return `<div class="rr-titel">REKENREGEL</div>
+      <ul>
+        <li>Als je vermindert met een percentage, dan bereken je eerst hoeveel procent je nog over hebt. Je vertrekt van 100 % en je doet er een percentage af.</li>
+        <li>Dat restpercentage kun je schrijven als een decimaal getal.</li>
+        <li>Om een percentage te nemen van een getal, vermenigvuldig je het percentage (in decimale schrijfwijze) met dat getal.</li>
+      </ul>`;
+  }
+}
+
+// ── Oefening renderen ──
+function toonOefening() {
+  if (huidigeIdx >= TOTAAL) { toonEindscherm(); return; }
+
+  pogingTeller = 0;
+  updateVoortgang();
+  const oef = oefeningen[huidigeIdx];
+
+  document.getElementById('inhoud').innerHTML = `
+    <div class="oefening-kaart" id="oef-kaart">
+      <p class="vraag-label">Vul een gepast decimaal getal in</p>
+      <p class="vraag-tekst">${oef.tekst}</p>
+
+      <div class="stap-rij">
+        <span class="equals">=</span>
+        <input class="invoer" id="invoer" type="text" placeholder=""
+               autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text">
+        <span class="mult-sym">·</span>
+        <span class="getal1-val">${oef.getal1}</span>
+      </div>
+
+      <div class="stap-rij">
+        <span class="equals">=</span>
+        <span class="resultaat-val" id="resultaat-val">…</span>
+      </div>
+
+      <div class="knoppen-rij">
+        <button class="btn btn-primair" id="controleer-btn" disabled>Controleer</button>
+        <button class="btn btn-succes" id="volgende-btn" style="display:none">Volgende oefening →</button>
+      </div>
+
+      <div class="feedback-box" id="feedback-box"></div>
+      <div class="rekenregel-blok" id="rekenregel-blok"></div>
+    </div>
+  `;
+
+  const invoer = document.getElementById('invoer');
+  const resultaatVal = document.getElementById('resultaat-val');
+  const controleerBtn = document.getElementById('controleer-btn');
+  const volgendeBtn = document.getElementById('volgende-btn');
+
+  invoer.addEventListener('input', () => {
+    const num = parseFloat(invoer.value.trim().replace(',', '.'));
+    resultaatVal.textContent = Number.isFinite(num) ? formatNL(num * oef.getal1) : '…';
+    controleerBtn.disabled = invoer.value.trim() === '';
+  });
+
+  invoer.focus();
+  controleerBtn.addEventListener('click', controleer);
+  volgendeBtn.addEventListener('click', toonOefening);
+}
+
+// ── Controleer antwoord ──
+function controleer() {
+  const oef = oefeningen[huidigeIdx];
+  const invoer = document.getElementById('invoer');
+  const resultaatVal = document.getElementById('resultaat-val');
+  const fbBox = document.getElementById('feedback-box');
+  const rrBlok = document.getElementById('rekenregel-blok');
+  const controleerBtn = document.getElementById('controleer-btn');
+  const volgendeBtn = document.getElementById('volgende-btn');
+
+  const userInput = invoer.value.trim();
+  const hasPeriod = userInput.includes('.');
+  const hasComma = userInput.includes(',');
+  const userNum = parseFloat(userInput.replace(',', '.'));
+  const numericallyCorrect = Number.isFinite(userNum) && Math.abs(userNum - oef.antwoord) < 0.0001;
+  // Komma fout: juist getal maar met punt i.p.v. komma ingegeven
+  const kommaFout = numericallyCorrect && hasPeriod && !hasComma;
+  const correct = numericallyCorrect && !kommaFout;
+
+  function resetInvoer(delay) {
+    setTimeout(() => {
+      invoer.classList.remove('fout');
+      invoer.value = '';
+      resultaatVal.textContent = '…';
+      invoer.disabled = false;
+      invoer.focus();
+      controleerBtn.disabled = true;
+    }, delay);
+  }
+
+  function toonDefinitief() {
+    invoer.classList.add('fout');
+    foutGegaan++;
+    huidigeIdx++;
+    rrBlok.style.display = 'none';
+    const juistAntwoord = formatNL(oef.antwoord);
+    const uitkomst = formatNL(oef.antwoord * oef.getal1);
+    let annotatie;
+    if (oef.type === 1) {
+      annotatie = `${oef.getal2} % = ${juistAntwoord}`;
+    } else if (oef.type === 2) {
+      annotatie = `100 % + ${oef.getal2} % = ${100 + oef.getal2} % = ${juistAntwoord}`;
+    } else {
+      annotatie = `100 % − ${oef.getal2} % = ${100 - oef.getal2} % = ${juistAntwoord}`;
+    }
+    fbBox.className = 'feedback-box fout-definitief';
+    fbBox.innerHTML = `❌ Het juiste antwoord is:<div class="uitwerking">
+      <div>${oef.tekst}</div>
+      <div class="uitw-rij"><span>= ${juistAntwoord} · ${oef.getal1}</span><span class="uitw-hint">${annotatie}</span></div>
+      <div>= ${uitkomst}</div>
+    </div>`;
+    fbBox.style.display = 'block';
+    controleerBtn.style.display = 'none';
+    volgendeBtn.style.display = 'inline-block';
+    invoer.disabled = true;
+    updateVoortgang();
+  }
+
+  // ── KOMMA FOUT ──
+  if (kommaFout) {
+    invoer.classList.add('fout');
+    if (pogingTeller === 0) {
+      fbBox.className = 'feedback-box fout-tijdelijk';
+      fbBox.innerHTML = 'We noteren decimale getallen met een komma. Denk daar aan.';
+      fbBox.style.display = 'block';
+      resetInvoer(1200);
+      pogingTeller = 1;
+    } else {
+      toonDefinitief();
+    }
+    return;
+  }
+
+  // ── GOED ──
+  if (correct) {
+    invoer.classList.add('correct');
+    if (pogingTeller === 0) {
+      punten += 1;
+      eerstePoging++;
+      fbBox.innerHTML = '✅ Correct! Goed gedaan!';
+    } else {
+      punten += 0.5;
+      tweedePoging++;
+      rrBlok.style.display = 'none';
+      fbBox.innerHTML = '✅ Correct bij de tweede poging!';
+    }
+    huidigeIdx++;
+    fbBox.className = 'feedback-box succes';
+    fbBox.style.display = 'block';
+    controleerBtn.style.display = 'none';
+    volgendeBtn.style.display = 'inline-block';
+    invoer.disabled = true;
+    updateVoortgang();
+    return;
+  }
+
+  // ── FOUT (eerste poging) ──
+  if (pogingTeller === 0) {
+    invoer.classList.add('fout');
+    fbBox.className = 'feedback-box fout-tijdelijk';
+    fbBox.innerHTML = 'Je antwoord is niet juist. Bekijk de rekenregel en probeer opnieuw.';
+    fbBox.style.display = 'block';
+    rrBlok.innerHTML = bepaalRekenregel(oef);
+    rrBlok.style.display = 'block';
+    resetInvoer(800);
+    pogingTeller = 1;
+    return;
+  }
+
+  // ── FOUT (tweede poging) — definitief ──
+  toonDefinitief();
+}
+
+// ── Eindscherm ──
+function toonEindscherm() {
+  updateVoortgang();
+
+  let algScore, emoji, bericht;
+  if (punten >= 9) {
+    algScore = 'A';
+    emoji = '🌟';
+    bericht = 'Uitstekend! Je beheerst het procentrekenen heel goed.';
+  } else if (punten >= 7) {
+    algScore = 'B';
+    emoji = '😊';
+    bericht = 'Goed gedaan! Je bent al ver gevorderd. Blijf oefenen!';
+  } else {
+    algScore = 'C';
+    emoji = '📚';
+    bericht = 'Oefen nog wat verder. Je kan dit zeker verbeteren!';
+  }
+
+  document.getElementById('inhoud').innerHTML = `
+    <div class="eindscherm">
+      <div class="eind-emoji">${emoji}</div>
+      <div class="eind-punten">${punten}/10</div>
+      <div class="eind-score-label">Je haalde ${punten}/10</div>
+      <div class="score-badge ${algScore}">Score: ${algScore}</div>
+      <div class="eind-bericht">${bericht}</div>
+      <button class="btn btn-primair" id="terug-btn">← Terug naar oefeningen</button>
+      <p id="opslaan-status" style="margin-top:14px;font-size:0.82rem;color:var(--muted);">Resultaat opslaan…</p>
+    </div>
+  `;
+
+  document.getElementById('terug-btn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+
+  slaanOp(algScore);
+}
+
+// ── Firebase opslaan ──
+async function slaanOp(algScore) {
+  try {
+    const docRef = doc(db, 'leerlingen', user.email);
+    await updateDoc(docRef, {
+      resultaten: arrayUnion({
+        type: TYPE_NR,
+        datum: new Date().toISOString(),
+        score: algScore,
+        totaal: punten,
+        eerste: eerstePoging,
+        tweede: tweedePoging,
+        fout: foutGegaan
+      })
+    });
+    const el = document.getElementById('opslaan-status');
+    if (el) { el.textContent = '✓ Resultaat opgeslagen.'; el.style.color = 'var(--success)'; }
+  } catch(err) {
+    console.error('Fout bij opslaan:', err);
+    const el = document.getElementById('opslaan-status');
+    if (el) { el.textContent = '⚠️ Resultaat kon niet worden opgeslagen. Controleer je internetverbinding.'; el.style.color = 'var(--warning)'; }
+  }
+}
+
+// ── Init ──
+user = checkLogin();
+if (user) {
+  oefeningen = genereer();
+  toonOefening();
+}
+</script>
+
+</body>
+</html>
